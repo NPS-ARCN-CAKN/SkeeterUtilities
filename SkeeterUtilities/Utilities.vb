@@ -1,6 +1,7 @@
 ﻿Imports System.Data.OleDb
 Imports System.Data.SqlClient
 Imports System.IO
+Imports System.IO.Compression
 Imports System.Windows.Forms
 Imports DevExpress.XtraGrid
 Imports DevExpress.XtraGrid.Views.Grid
@@ -129,6 +130,10 @@ Namespace DataFileToDataTableConverters
 
 
     Public Class DataFileToDataTableConverters
+
+
+
+
 
 
         ''' <summary>

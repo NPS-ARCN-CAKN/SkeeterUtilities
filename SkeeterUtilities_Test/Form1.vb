@@ -311,6 +311,8 @@ Public Class Form1
     End Sub
 
     Private Sub ShowDataTableExplorerControlButton_Click(sender As Object, e As EventArgs) Handles ShowDataTableExplorerControlButton.Click
+        'Clear the tools
+        ClearTools()
 
         'Make a DataTable
         Dim ReturnDataTable As New DataTable("A DataTable")
