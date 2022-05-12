@@ -55,6 +55,7 @@ Partial Class Form1
         Me.GridView1 = New DevExpress.XtraGrid.Views.Grid.GridView()
         Me.PropertyGridTabPage = New System.Windows.Forms.TabPage()
         Me.OutputPropertyGrid = New System.Windows.Forms.PropertyGrid()
+        Me.DevExpressMapTabPage = New System.Windows.Forms.TabPage()
         CType(Me.SplitContainer1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SplitContainer1.Panel1.SuspendLayout()
         Me.SplitContainer1.Panel2.SuspendLayout()
@@ -321,6 +322,7 @@ Partial Class Form1
         Me.OutputTabControl.Controls.Add(Me.TextTabPage)
         Me.OutputTabControl.Controls.Add(Me.DataGridViewTabPage)
         Me.OutputTabControl.Controls.Add(Me.PropertyGridTabPage)
+        Me.OutputTabControl.Controls.Add(Me.DevExpressMapTabPage)
         Me.OutputTabControl.Dock = System.Windows.Forms.DockStyle.Fill
         Me.OutputTabControl.Location = New System.Drawing.Point(0, 0)
         Me.OutputTabControl.Name = "OutputTabControl"
@@ -463,6 +465,16 @@ Partial Class Form1
         Me.OutputPropertyGrid.Size = New System.Drawing.Size(901, 729)
         Me.OutputPropertyGrid.TabIndex = 0
         '
+        'DevExpressMapTabPage
+        '
+        Me.DevExpressMapTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.DevExpressMapTabPage.Name = "DevExpressMapTabPage"
+        Me.DevExpressMapTabPage.Padding = New System.Windows.Forms.Padding(3)
+        Me.DevExpressMapTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.DevExpressMapTabPage.TabIndex = 4
+        Me.DevExpressMapTabPage.Text = "DevExpress Map"
+        Me.DevExpressMapTabPage.UseVisualStyleBackColor = True
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -526,4 +538,5 @@ Partial Class Form1
     Friend WithEvents InputTextBox As TextBox
     Friend WithEvents TransposeADataTableButton As Button
     Friend WithEvents DataTableFromSQLServerButton As Button
+    Friend WithEvents DevExpressMapTabPage As TabPage
 End Class

@@ -913,8 +913,7 @@ Namespace DataFileToDataTableConverters
         Public Shared Function GetMetadataDataTable() As DataTable
             Dim DT As New DataTable("Metadata")
             With DT
-                .Columns.Add("Filename", GetType(String))
-                .Columns.Add("Worksheet", GetType(String))
+
                 .Columns.Add("ColumnName", GetType(String))
                 .Columns.Add("Caption", GetType(String))
                 .Columns.Add("DataType", GetType(String))
@@ -943,7 +942,8 @@ Namespace DataFileToDataTableConverters
                 .Columns.Add("DatesCount", GetType(Integer))
                 .Columns.Add("Dateness", GetType(Decimal)) ', "DatesCount / RowCount")
                 .Columns.Add("UniqueValues", GetType(String))
-
+                .Columns.Add("Filename", GetType(String))
+                .Columns.Add("Worksheet", GetType(String))
                 .Columns.Add("TableName", GetType(String))
             End With
             Return DT
