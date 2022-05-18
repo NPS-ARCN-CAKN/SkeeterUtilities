@@ -131,7 +131,460 @@ Namespace DataFileToDataTableConverters
 
     Public Class DataFileToDataTableConverters
 
+        ''' <summary>
+        ''' Returns a DataTable of information about SourceDataTable.
+        ''' </summary>
+        ''' <param name="SourceDataTable">Source data table. DataTable.</param>
+        ''' <param name="UniqueValuesSeparator">One thing that is returned for each column of SourceDataTable is a list of unique values. 
+        ''' These unique values will be separated by UniqueValuesSeparator.</param>
+        ''' <returns></returns>
+        Public Shared Function GetMetadataFromDataTable(SourceDataTable As DataTable, Optional UniqueValuesSeparator As String = ",") As DataTable
 
+            'Build a data table to hold metadata
+            Dim MetadataDataTable As DataTable = GetMetadataDataTable()
+            MetadataDataTable.TableName = SourceDataTable.TableName & " Metadata"
+
+            'Build a metadata unique values data table
+            Dim MetadataUniqueValuesDataTable As DataTable = GetMetadataUniqueValuesDataTable()
+
+            'Loop through the columns in the data table and build up metadata
+            For Each SourceColumn As DataColumn In SourceDataTable.Columns
+                Dim NewMetadataRow As DataRow = MetadataDataTable.NewRow
+
+
+                Dim SourceColumnIsNumeric As Boolean = True
+                Dim SourceColumnIsBit As Boolean = True
+                Dim SourceColumnIsInteger As Boolean = False
+                Dim SourceColumnIsDate As Boolean = True
+                Dim SourceColumnIsBlank As Boolean = False
+
+                'Loop through each row in the column
+                Dim RowIndex As Integer = 0
+                Dim BlankCount As Integer = 0
+                Dim NullCount As Integer = 0
+                Dim NumericValuesCount As Integer = 0
+                Dim BitValuesCount As Integer = 0
+                Dim TrueValuesCount As Integer = 0
+                Dim FalseValuesCount As Integer = 0
+                Dim DatesCount As Integer = 0
+                Dim MaxLength As Integer = 0
+                Dim RowCount As Integer = SourceDataTable.Rows.Count
+                Dim Numericity As Decimal = 0
+                Dim Bitness As Decimal = 0
+                Dim Dateness As Decimal = 0
+
+                'Loop through the rows
+                For Each SourceRow As DataRow In SourceDataTable.Rows
+
+                    'Make sure we have a row
+                    If Not SourceRow Is Nothing Then
+
+                        'Make sure the SourceRow's cell is not nothing
+                        If Not SourceRow.Item(SourceColumn.ColumnName) Is Nothing Then
+
+                            'Make sure the cell is not null
+                            If IsDBNull(SourceRow.Item(SourceColumn.ColumnName)) Then
+
+                                'The cell is null
+                                NullCount = NullCount + 1
+
+                            ElseIf SourceRow.Item(SourceColumn.ColumnName).ToString.Length = 0 Then
+
+                                'The cell is blank
+                                BlankCount = BlankCount + 1
+
+                            Else
+                                'Cell is not null and not blank, process it
+
+                                'Get the cell's value
+                                Dim CellValue As String = SourceRow.Item(SourceColumn.ColumnName).ToString.Trim
+
+                                'Max length
+                                If CellValue.Length > MaxLength Then MaxLength = CellValue.Length
+
+                                'IsNumeric
+                                If IsNumeric(CellValue) Then
+                                    NumericValuesCount = NumericValuesCount + 1
+                                End If
+                            End If
+
+
+
+                            '    
+
+                            '    
+
+                            '    ''Get the bitness
+                            '    'If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
+                            '    '    TrueValuesCount = TrueValuesCount + 1
+                            '    'ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
+                            '    '    FalseValuesCount = FalseValuesCount + 1
+                            '    'End If
+
+                            '    ''IsBit
+                            '    'If CellValue.ToString.Trim <> "1" And CellValue.ToString.Trim <> "0" Then
+                            '    '    SourceColumnIsBit = False
+                            '    'End If
+
+                            '    ''IsDate
+                            '    'If IsDate(CellValue) = True Then DatesCount = DatesCount + 1 Else SourceColumnIsDate = False
+
+                            '    ''If any cell values are not numeric then the column is not numeric
+                            '    'If CellValue.ToString.Trim <> "" Then
+                            '    '    If IsNumeric(CellValue) = False Then SourceColumnIsNumeric = False
+                            '    'Else
+                            '    '    'Blank, increment the blank counter
+                            '    '    BlankCount = BlankCount + 1
+                            '    'End If
+                            'Else
+                            '    BlankCount = BlankCount + 1
+                            'End If
+                        End If
+                    End If
+                    RowIndex = RowIndex + 1
+                Next
+
+                'Bitness
+                If FalseValuesCount > 0 Then SourceColumnIsBit = False
+
+                'Dateness
+                If RowCount - BlankCount > 0 Then
+                    Dateness = DatesCount / (RowCount - BlankCount)
+                End If
+
+
+                'Now get all the distinct values
+                Dim ColumnNames() As String = {SourceColumn.ColumnName}
+                Dim UniqueValuesDataTable As DataTable = SourceDataTable.DefaultView.ToTable(True, ColumnNames)
+                Dim UniqueValues As String = ""
+                'Dim CSVSeparator As String = ","
+
+                'Build a separated string of unique values
+                For Each Row As DataRow In UniqueValuesDataTable.Rows
+                    If Not Row.Item(0) Is Nothing Then
+                        If Not IsDBNull(Row.Item(0)) Then
+                            'Add the item to the list of unique items
+                            Dim RowValue As String = Row.Item(0)
+                            UniqueValues = UniqueValues & RowValue & UniqueValuesSeparator
+                        End If
+                    End If
+                Next
+
+                'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
+                If BlankCount = RowCount Then
+                    SourceColumnIsNumeric = False
+                    SourceColumnIsBit = False
+                    SourceColumnIsDate = False
+                    SourceColumnIsBlank = True
+                End If
+
+                'Get at numericity
+                If RowCount - BlankCount > 0 Then Numericity = NumericValuesCount / (RowCount - BlankCount) Else Numericity = 0
+                With NewMetadataRow
+                    '.Item("Filename") = Filename
+                    ' .Item("Worksheet") = Worksheet
+                    .Item("TableName") = SourceColumn.Table.TableName
+                    .Item("ColumnName") = SourceColumn.ColumnName
+                    .Item("Caption") = SourceColumn.Caption
+                    .Item("DataType") = SourceColumn.DataType.ToString.Replace("System.", "")
+                    .Item("AllowDBNull") = SourceColumn.AllowDBNull
+                    .Item("AutoIncrement") = SourceColumn.AutoIncrement
+                    .Item("DefaultValue") = SourceColumn.DefaultValue
+                    .Item("Expression") = SourceColumn.Expression
+                    .Item("IsUnique") = SourceColumn.Unique
+                    .Item("MaxLength") = MaxLength
+                    .Item("IsNumeric") = SourceColumnIsNumeric
+                    .Item("IsBit") = SourceColumnIsBit
+                    .Item("Bitness") = Bitness
+                    .Item("Blanks") = BlankCount
+                    .Item("IsBlank") = SourceColumnIsBlank
+                    .Item("UniqueValues") = UniqueValues
+                    .Item("NumericValuesCount") = NumericValuesCount
+                    .Item("Numericity") = Numericity
+                    .Item("BitValuesCount") = TrueValuesCount + FalseValuesCount
+                    .Item("TrueValuesCount") = TrueValuesCount
+                    .Item("FalseValuesCount") = FalseValuesCount
+                    .Item("RowCount") = RowCount
+                    .Item("DatesCount") = DatesCount
+                    .Item("Dateness") = Dateness
+                    .Item("IsDate") = SourceColumnIsDate
+                    .Item("Max") = SourceDataTable.Compute("Max([" & SourceColumn.ColumnName & "])", "")
+                    .Item("Min") = SourceDataTable.Compute("Min([" & SourceColumn.ColumnName & "])", "")
+                End With
+                MetadataDataTable.Rows.Add(NewMetadataRow)
+
+                'add the column's unique values to the unique values datatable
+                For Each Row As DataRow In UniqueValuesDataTable.Rows
+                    If Not Row.Item(0) Is Nothing Then
+                        If Not IsDBNull(Row.Item(0)) Then
+                            'Make a new row for the unique values data table
+                            Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
+                            NewUniqueValuesRow.Item("ColumnName") = SourceColumn.ColumnName
+                            NewUniqueValuesRow.Item("UniqueValue") = Row.Item(0)
+                            MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
+                        End If
+                    End If
+                Next
+            Next
+            Return MetadataDataTable
+        End Function
+
+        '''' <summary>
+        '''' Converts an Excel workbook and all its worksheets to a Dataset.
+        '''' </summary>
+        '''' <param name="ExcelConnectionString">Excel ConnectionString. String.</param>
+        '''' <returns>Dataset.</returns>
+        'Public Shared Function GetDatasetFromExcelWorkbook(ExcelConnectionString As String) As DataSet
+
+        '    'Dataset to return
+        '    Dim ExcelDataset As New DataSet
+
+        '    Try
+
+        '        'Name the Dataset for the input filename
+        '        Dim CS As New OleDbConnectionStringBuilder(ExcelConnectionString)
+        '        Dim DataSourceFileInfo As New FileInfo(CS.DataSource)
+        '        If DataSourceFileInfo.Name.Trim.Length > 0 Then
+        '            ExcelDataset.DataSetName = DataSourceFileInfo.Name
+        '        End If
+
+        '        'Get the workbook's worksheets into a DataTable and add them to the Dataset
+        '        Dim WorksheetsDataTable As DataTable = GetExcelWorksheets(ExcelConnectionString)
+        '        WorksheetsDataTable.TableName = "Worksheets"
+        '        WorksheetsDataTable.Prefix = "Worksheets"
+        '        'ExcelDataset.Tables.Add(WorksheetsDataTable)
+
+        '        'Loop through the worksheets, convert them to DataTables and add them to the Dataset
+        '        For Each WorksheetRow As DataRow In WorksheetsDataTable.Rows
+
+        '            'Create a DataTable for the worksheet
+        '            Dim WorksheetName As String = WorksheetRow.Item("TABLE_NAME")
+        '            Dim WorksheetDataTable As New DataTable(WorksheetName)
+        '            WorksheetDataTable.TableName = WorksheetName
+        '            WorksheetDataTable.Prefix = "Dataset"
+
+        '            'Query the worksheet's data into WorksheetDataTable 
+        '            Dim Sql As String = "SELECT * FROM [" & WorksheetName & "]"
+        '            Dim MyConnection As New OleDbConnection(ExcelConnectionString)
+        '            MyConnection.Open()
+        '            Dim MyCommand As New OleDbCommand(Sql, MyConnection)
+        '            Dim MyDataAdapter As New OleDbDataAdapter(MyCommand)
+        '            MyDataAdapter.Fill(WorksheetDataTable)
+        '            ExcelDataset.Tables.Add(WorksheetDataTable)
+
+        '            'Create and add a MetadataDataTable for WorksheetDataTable
+        '            'Build a data table to hold metadata
+        '            Dim MetadataDataTable As DataTable = GetMetadataDataTable()
+        '            With MetadataDataTable
+        '                .TableName = WorksheetName & " Metadata"
+        '                .Prefix = "Metadata"
+        '            End With
+        '            ' ExcelDataset.Tables.Add(MetadataDataTable)
+
+        '            'Build a metadata unique values data table
+        '            Dim MetadataUniqueValuesDataTable As DataTable = GetMetadataUniqueValuesDataTable()
+        '            MetadataUniqueValuesDataTable.TableName = WorksheetName & " Unique Values"
+        '            MetadataUniqueValuesDataTable.Prefix = "UniqueValues"
+        '            'ExcelDataset.Tables.Add(MetadataUniqueValuesDataTable)
+
+
+        '            ' Define the relationship between the MetadataDataTable and the MetadataUniqueValuesDataTable on TableName and ColumnName
+        '            'Dim ParentColumns() As DataColumn
+        '            'Dim ChildColumns() As DataColumn
+        '            'ParentColumns = New DataColumn() {MetadataDataTable.Columns("TableName"), MetadataDataTable.Columns("ColumnName")}
+        '            'ChildColumns = New DataColumn() {MetadataUniqueValuesDataTable.Columns("TableName"), MetadataUniqueValuesDataTable.Columns("ColumnName")}
+        '            'Dim ColumnsUniqueValuesDataRelation As New DataRelation(MetadataUniqueValuesDataTable.TableName, ParentColumns, ChildColumns)
+        '            'ExcelDataset.Relations.Add(ColumnsUniqueValuesDataRelation)
+
+
+        '            'For Each WorksheetColumn As DataColumn In WorksheetDataTable.Columns
+        '            '    Dim NewMetadataRow As DataRow = MetadataDataTable.NewRow
+
+
+        '            '    Dim WorksheetColumnIsNumeric As Boolean = True
+        '            '    Dim WorksheetColumnIsBit As Boolean = True
+        '            '    Dim WorksheetColumnIsInteger As Boolean = False
+        '            '    Dim WorksheetColumnIsDate As Boolean = True
+        '            '    Dim WorksheetColumnIsBlank As Boolean = False
+
+        '            '    'Loop through each row in the column
+        '            '    Dim RowIndex As Integer = 0
+        '            '    Dim BlankCount As Integer = 0
+        '            '    Dim NumericValuesCount As Integer = 0
+        '            '    Dim BitValuesCount As Integer = 0
+        '            '    Dim TrueValuesCount As Integer = 0
+        '            '    Dim FalseValuesCount As Integer = 0
+        '            '    Dim DatesCount As Integer = 0
+        '            '    Dim MaxValue As Double
+        '            '    Dim MinValue As Double
+        '            '    Dim MaxLength As Integer = 0
+        '            '    Dim RowCount As Integer = WorksheetDataTable.Rows.Count
+        '            '    Dim Numericity As Decimal = 0
+        '            '    Dim Bitness As Decimal = 0
+        '            '    Dim Dateness As Decimal = 0
+
+        '            '    For Each SourceRow As DataRow In WorksheetDataTable.Rows
+
+        '            '        Dim CellValue As String = ""
+        '            '        If Not SourceRow Is Nothing Then
+        '            '            If Not IsDBNull(SourceRow.Item(WorksheetColumn.ColumnName)) Then
+
+
+        '            '                'Get the cell's value
+        '            '                CellValue = SourceRow.Item(WorksheetColumn.ColumnName)
+
+        '            '                If RowIndex = 0 And IsNumeric(CellValue) Then
+        '            '                    MinValue = CDbl(CellValue)
+        '            '                    MaxValue = CDbl(CellValue)
+        '            '                End If
+
+        '            '                'Max length
+        '            '                If CellValue.ToString.Trim.Length > MaxLength Then MaxLength = CellValue.ToString.Trim.Length
+
+        '            '                'IsNumeric
+        '            '                If IsNumeric(CellValue) Then
+        '            '                    NumericValuesCount = NumericValuesCount + 1
+
+        '            '                    'Max
+        '            '                    'If CellValue > MaxValue Then MaxValue = CellValue
+        '            '                    'MaxValue = WorksheetDataTable.Compute("MAX(" & WorksheetColumn.ColumnName & ")", "")
+
+        '            '                    ''Min 
+        '            '                    'If CellValue < MinValue Then MinValue = CellValue
+
+        '            '                    'IsInteger
+        '            '                    If Integer.TryParse(CellValue, vbNull) = True Then WorksheetColumnIsInteger = True
+        '            '                    Dim IsInteger As Boolean = Integer.TryParse(CellValue, vbNull)
+
+        '            '                End If
+
+        '            '                'Get the bitness
+        '            '                If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
+        '            '                    TrueValuesCount = TrueValuesCount + 1
+        '            '                ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
+        '            '                    FalseValuesCount = FalseValuesCount + 1
+        '            '                End If
+
+        '            '                'IsBit
+        '            '                If CellValue.ToString.Trim <> "1" And CellValue.ToString.Trim <> "0" Then
+        '            '                    WorksheetColumnIsBit = False
+        '            '                End If
+
+        '            '                'IsDate
+        '            '                If IsDate(CellValue) = True Then DatesCount = DatesCount + 1 Else WorksheetColumnIsDate = False
+
+        '            '                'If any cell values are not numeric then the column is not numeric
+        '            '                If CellValue.ToString.Trim <> "" Then
+        '            '                    If IsNumeric(CellValue) = False Then WorksheetColumnIsNumeric = False
+        '            '                Else
+        '            '                    'Blank, increment the blank counter
+        '            '                    BlankCount = BlankCount + 1
+        '            '                End If
+        '            '            Else
+        '            '                BlankCount = BlankCount + 1
+        '            '            End If
+        '            '        End If
+        '            '        RowIndex = RowIndex + 1
+        '            '    Next
+
+        '            '    'Bitness
+        '            '    If FalseValuesCount > 0 Then WorksheetColumnIsBit = False
+
+        '            '    'Dateness
+        '            '    If RowCount - BlankCount > 0 Then
+        '            '        Dateness = DatesCount / (RowCount - BlankCount)
+        '            '    End If
+
+
+        '            '    'Now get all the distinct values
+        '            '    Dim ColumnNames() As String = {WorksheetColumn.ColumnName}
+        '            '    Dim UniqueValuesDataTable As DataTable = WorksheetDataTable.DefaultView.ToTable(True, ColumnNames)
+
+        '            '    Dim UniqueValues As String = ""
+        '            '    Dim CSVSeparator As String = ","
+
+        '            '    For Each Row As DataRow In UniqueValuesDataTable.Rows
+
+        '            '        If Not Row.Item(0) Is Nothing Then
+        '            '            If Not IsDBNull(Row.Item(0)) Then
+        '            '                'Add the item to the list of unique items
+        '            '                Dim RowValue As String = Row.Item(0)
+        '            '                UniqueValues = UniqueValues & RowValue & CSVSeparator
+        '            '            End If
+        '            '        End If
+        '            '    Next
+
+        '            '    'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
+        '            '    If BlankCount = RowCount Then
+        '            '        WorksheetColumnIsNumeric = False
+        '            '        WorksheetColumnIsBit = False
+        '            '        WorksheetColumnIsDate = False
+        '            '        WorksheetColumnIsBlank = True
+        '            '    End If
+
+        '            '    'Get at numericity
+        '            '    If RowCount - BlankCount > 0 Then Numericity = NumericValuesCount / (RowCount - BlankCount) Else Numericity = 0
+        '            '    With NewMetadataRow
+        '            '        .Item("Filename") = DataSourceFileInfo.Name
+        '            '        .Item("Worksheet") = WorksheetName
+        '            '        .Item("TableName") = WorksheetName
+        '            '        .Item("ColumnName") = WorksheetColumn.ColumnName
+        '            '        .Item("Caption") = WorksheetColumn.Caption
+        '            '        .Item("DataType") = WorksheetColumn.DataType.ToString.Replace("System.", "")
+        '            '        .Item("AllowDBNull") = WorksheetColumn.AllowDBNull
+        '            '        .Item("AutoIncrement") = WorksheetColumn.AutoIncrement
+        '            '        .Item("DefaultValue") = WorksheetColumn.DefaultValue
+        '            '        .Item("Expression") = WorksheetColumn.Expression
+        '            '        .Item("IsUnique") = WorksheetColumn.Unique
+        '            '        .Item("MaxLength") = MaxLength
+        '            '        .Item("IsNumeric") = WorksheetColumnIsNumeric
+        '            '        .Item("IsBit") = WorksheetColumnIsBit
+        '            '        .Item("Bitness") = Bitness
+        '            '        .Item("Blanks") = BlankCount
+        '            '        .Item("IsBlank") = WorksheetColumnIsBlank
+        '            '        .Item("UniqueValues") = UniqueValues
+        '            '        .Item("NumericValuesCount") = NumericValuesCount
+        '            '        .Item("Numericity") = Numericity
+        '            '        .Item("BitValuesCount") = TrueValuesCount + FalseValuesCount
+        '            '        .Item("TrueValuesCount") = TrueValuesCount
+        '            '        .Item("FalseValuesCount") = FalseValuesCount
+        '            '        .Item("RowCount") = RowCount
+        '            '        .Item("DatesCount") = DatesCount
+        '            '        .Item("Dateness") = Dateness
+        '            '        .Item("IsDate") = WorksheetColumnIsDate
+        '            '        .Item("Max") = WorksheetDataTable.Compute("Max([" & WorksheetColumn.ColumnName & "])", "")
+        '            '        .Item("Min") = WorksheetDataTable.Compute("Min([" & WorksheetColumn.ColumnName & "])", "")
+        '            '    End With
+        '            '    MetadataDataTable.Rows.Add(NewMetadataRow)
+
+        '            '    'add the column's unique values to the unique values datatable
+        '            '    For Each Row As DataRow In UniqueValuesDataTable.Rows
+        '            '        If Not Row.Item(0) Is Nothing Then
+        '            '            If Not IsDBNull(Row.Item(0)) Then
+        '            '                'Make a new row for the unique values data table
+        '            '                Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
+        '            '                With NewUniqueValuesRow
+        '            '                    .Item("TableName") = WorksheetName
+        '            '                    .Item("ColumnName") = WorksheetColumn.ColumnName
+        '            '                    .Item("UniqueValue") = Row.Item(0)
+        '            '                End With
+        '            '                MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
+        '            '            End If
+        '            '        End If
+        '            '    Next
+
+
+        '            'Next
+
+        '            'Dim MDS As DataSet = GetMetadataDatasetFromDataTable(WorksheetDataTable)
+
+        '            MyConnection.Close()
+        '        Next
+        '    Catch ex As Exception
+        '        MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")")
+        '    End Try
+        '    Return ExcelDataset
+        'End Function
 
 
 
@@ -141,7 +594,7 @@ Namespace DataFileToDataTableConverters
         ''' </summary>
         ''' <param name="ExcelConnectionString">Excel ConnectionString. String.</param>
         ''' <returns>Dataset.</returns>
-        Public Shared Function GetDatasetFromExcelWorkbook(ExcelConnectionString As String) As DataSet
+        Public Shared Function GetDatasetFromExcelWorkbook(ExcelConnectionString As String, Optional WithWorksheetsDataTable As Boolean = False, Optional WithMetadata As Boolean = False) As DataSet
 
             'Dataset to return
             Dim ExcelDataset As New DataSet
@@ -159,7 +612,11 @@ Namespace DataFileToDataTableConverters
                 Dim WorksheetsDataTable As DataTable = GetExcelWorksheets(ExcelConnectionString)
                 WorksheetsDataTable.TableName = "Worksheets"
                 WorksheetsDataTable.Prefix = "Worksheets"
-                ExcelDataset.Tables.Add(WorksheetsDataTable)
+
+                'Add to the Dataset a DataTable of worksheet names, if requested.
+                If WithWorksheetsDataTable = True Then
+                    ExcelDataset.Tables.Add(WorksheetsDataTable)
+                End If
 
                 'Loop through the worksheets, convert them to DataTables and add them to the Dataset
                 For Each WorksheetRow As DataRow In WorksheetsDataTable.Rows
@@ -179,216 +636,16 @@ Namespace DataFileToDataTableConverters
                     MyDataAdapter.Fill(WorksheetDataTable)
                     ExcelDataset.Tables.Add(WorksheetDataTable)
 
-                    'Create and add a MetadataDataTable for WorksheetDataTable
-                    'Build a data table to hold metadata
-                    Dim MetadataDataTable As DataTable = GetMetadataDataTable()
-                    With MetadataDataTable
-                        .TableName = WorksheetName & " Metadata"
-                        .Prefix = "Metadata"
-                    End With
-                    ExcelDataset.Tables.Add(MetadataDataTable)
-
-                    'Build a metadata unique values data table
-                    Dim MetadataUniqueValuesDataTable As DataTable = GetMetadataUniqueValuesDataTable()
-                    MetadataUniqueValuesDataTable.TableName = WorksheetName & " Unique Values"
-                    MetadataUniqueValuesDataTable.Prefix = "UniqueValues"
-                    ExcelDataset.Tables.Add(MetadataUniqueValuesDataTable)
-
-
-                    ' Define the relationship between the MetadataDataTable and the MetadataUniqueValuesDataTable on TableName and ColumnName
-                    Dim ParentColumns() As DataColumn
-                    Dim ChildColumns() As DataColumn
-                    ParentColumns = New DataColumn() {MetadataDataTable.Columns("TableName"), MetadataDataTable.Columns("ColumnName")}
-                    ChildColumns = New DataColumn() {MetadataUniqueValuesDataTable.Columns("TableName"), MetadataUniqueValuesDataTable.Columns("ColumnName")}
-                    Dim ColumnsUniqueValuesDataRelation As New DataRelation(MetadataUniqueValuesDataTable.TableName, ParentColumns, ChildColumns)
-                    ExcelDataset.Relations.Add(ColumnsUniqueValuesDataRelation)
-
-
-                    For Each WorksheetColumn As DataColumn In WorksheetDataTable.Columns
-                        Dim NewMetadataRow As DataRow = MetadataDataTable.NewRow
-
-
-                        Dim WorksheetColumnIsNumeric As Boolean = True
-                        Dim WorksheetColumnIsBit As Boolean = True
-                        Dim WorksheetColumnIsInteger As Boolean = False
-                        Dim WorksheetColumnIsDate As Boolean = True
-                        Dim WorksheetColumnIsBlank As Boolean = False
-
-                        'Loop through each row in the column
-                        Dim RowIndex As Integer = 0
-                        Dim BlankCount As Integer = 0
-                        Dim NumericValuesCount As Integer = 0
-                        Dim BitValuesCount As Integer = 0
-                        Dim TrueValuesCount As Integer = 0
-                        Dim FalseValuesCount As Integer = 0
-                        Dim DatesCount As Integer = 0
-                        Dim MaxValue As Double
-                        Dim MinValue As Double
-                        Dim MaxLength As Integer = 0
-                        Dim RowCount As Integer = WorksheetDataTable.Rows.Count
-                        Dim Numericity As Decimal = 0
-                        Dim Bitness As Decimal = 0
-                        Dim Dateness As Decimal = 0
-
-                        For Each SourceRow As DataRow In WorksheetDataTable.Rows
-
-                            Dim CellValue As String = ""
-                            If Not SourceRow Is Nothing Then
-                                If Not IsDBNull(SourceRow.Item(WorksheetColumn.ColumnName)) Then
-
-
-                                    'Get the cell's value
-                                    CellValue = SourceRow.Item(WorksheetColumn.ColumnName)
-
-                                    If RowIndex = 0 And IsNumeric(CellValue) Then
-                                        MinValue = CDbl(CellValue)
-                                        MaxValue = CDbl(CellValue)
-                                    End If
-
-                                    'Max length
-                                    If CellValue.ToString.Trim.Length > MaxLength Then MaxLength = CellValue.ToString.Trim.Length
-
-                                    'IsNumeric
-                                    If IsNumeric(CellValue) Then
-                                        NumericValuesCount = NumericValuesCount + 1
-
-                                        'Max
-                                        'If CellValue > MaxValue Then MaxValue = CellValue
-                                        'MaxValue = WorksheetDataTable.Compute("MAX(" & WorksheetColumn.ColumnName & ")", "")
-
-                                        ''Min 
-                                        'If CellValue < MinValue Then MinValue = CellValue
-
-                                        'IsInteger
-                                        If Integer.TryParse(CellValue, vbNull) = True Then WorksheetColumnIsInteger = True
-                                        Dim IsInteger As Boolean = Integer.TryParse(CellValue, vbNull)
-
-                                    End If
-
-                                    'Get the bitness
-                                    If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
-                                        TrueValuesCount = TrueValuesCount + 1
-                                    ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
-                                        FalseValuesCount = FalseValuesCount + 1
-                                    End If
-
-                                    'IsBit
-                                    If CellValue.ToString.Trim <> "1" And CellValue.ToString.Trim <> "0" Then
-                                        WorksheetColumnIsBit = False
-                                    End If
-
-                                    'IsDate
-                                    If IsDate(CellValue) = True Then DatesCount = DatesCount + 1 Else WorksheetColumnIsDate = False
-
-                                    'If any cell values are not numeric then the column is not numeric
-                                    If CellValue.ToString.Trim <> "" Then
-                                        If IsNumeric(CellValue) = False Then WorksheetColumnIsNumeric = False
-                                    Else
-                                        'Blank, increment the blank counter
-                                        BlankCount = BlankCount + 1
-                                    End If
-                                Else
-                                    BlankCount = BlankCount + 1
-                                End If
-                            End If
-                            RowIndex = RowIndex + 1
-                        Next
-
-                        'Bitness
-                        If FalseValuesCount > 0 Then WorksheetColumnIsBit = False
-
-                        'Dateness
-                        If RowCount - BlankCount > 0 Then
-                            Dateness = DatesCount / (RowCount - BlankCount)
-                        End If
-
-
-                        'Now get all the distinct values
-                        Dim ColumnNames() As String = {WorksheetColumn.ColumnName}
-                        Dim UniqueValuesDataTable As DataTable = WorksheetDataTable.DefaultView.ToTable(True, ColumnNames)
-
-                        Dim UniqueValues As String = ""
-                        Dim CSVSeparator As String = ","
-
-                        For Each Row As DataRow In UniqueValuesDataTable.Rows
-
-                            If Not Row.Item(0) Is Nothing Then
-                                If Not IsDBNull(Row.Item(0)) Then
-                                    'Add the item to the list of unique items
-                                    Dim RowValue As String = Row.Item(0)
-                                    UniqueValues = UniqueValues & RowValue & CSVSeparator
-                                End If
-                            End If
-                        Next
-
-                        'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
-                        If BlankCount = RowCount Then
-                            WorksheetColumnIsNumeric = False
-                            WorksheetColumnIsBit = False
-                            WorksheetColumnIsDate = False
-                            WorksheetColumnIsBlank = True
-                        End If
-
-                        'Get at numericity
-                        If RowCount - BlankCount > 0 Then Numericity = NumericValuesCount / (RowCount - BlankCount) Else Numericity = 0
-                        With NewMetadataRow
-                            .Item("Filename") = DataSourceFileInfo.Name
-                            .Item("Worksheet") = WorksheetName
-                            .Item("TableName") = WorksheetName
-                            .Item("ColumnName") = WorksheetColumn.ColumnName
-                            .Item("Caption") = WorksheetColumn.Caption
-                            .Item("DataType") = WorksheetColumn.DataType.ToString.Replace("System.", "")
-                            .Item("AllowDBNull") = WorksheetColumn.AllowDBNull
-                            .Item("AutoIncrement") = WorksheetColumn.AutoIncrement
-                            .Item("DefaultValue") = WorksheetColumn.DefaultValue
-                            .Item("Expression") = WorksheetColumn.Expression
-                            .Item("IsUnique") = WorksheetColumn.Unique
-                            .Item("MaxLength") = MaxLength
-                            .Item("IsNumeric") = WorksheetColumnIsNumeric
-                            .Item("IsBit") = WorksheetColumnIsBit
-                            .Item("Bitness") = Bitness
-                            .Item("Blanks") = BlankCount
-                            .Item("IsBlank") = WorksheetColumnIsBlank
-                            .Item("UniqueValues") = UniqueValues
-                            .Item("NumericValuesCount") = NumericValuesCount
-                            .Item("Numericity") = Numericity
-                            .Item("BitValuesCount") = TrueValuesCount + FalseValuesCount
-                            .Item("TrueValuesCount") = TrueValuesCount
-                            .Item("FalseValuesCount") = FalseValuesCount
-                            .Item("RowCount") = RowCount
-                            .Item("DatesCount") = DatesCount
-                            .Item("Dateness") = Dateness
-                            .Item("IsDate") = WorksheetColumnIsDate
-                            .Item("Max") = WorksheetDataTable.Compute("Max([" & WorksheetColumn.ColumnName & "])", "")
-                            .Item("Min") = WorksheetDataTable.Compute("Min([" & WorksheetColumn.ColumnName & "])", "")
-                        End With
-                        MetadataDataTable.Rows.Add(NewMetadataRow)
-
-                        'add the column's unique values to the unique values datatable
-                        For Each Row As DataRow In UniqueValuesDataTable.Rows
-                            If Not Row.Item(0) Is Nothing Then
-                                If Not IsDBNull(Row.Item(0)) Then
-                                    'Make a new row for the unique values data table
-                                    Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
-                                    With NewUniqueValuesRow
-                                        .Item("TableName") = WorksheetName
-                                        .Item("ColumnName") = WorksheetColumn.ColumnName
-                                        .Item("UniqueValue") = Row.Item(0)
-                                    End With
-                                    MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
-                                End If
-                            End If
-                        Next
-
-
-                    Next
-
-                    'Dim MDS As DataSet = GetMetadataDatasetFromDataTable(WorksheetDataTable)
+                    'Add in a DataTable of metadata for WorksheetsDataTable if requested
+                    If WithMetadata = True Then
+                        Dim MDDT As DataTable = GetMetadataFromDataTable(WorksheetDataTable)
+                        ExcelDataset.Tables.Add(MDDT)
+                    End If
 
                     MyConnection.Close()
                 Next
             Catch ex As Exception
-            MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")")
+                MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")")
             End Try
             Return ExcelDataset
         End Function
@@ -485,7 +742,6 @@ Namespace DataFileToDataTableConverters
                     If CSV.Length > 0 Then
                         CSV = CSV.Substring(0, CSV.Trim.Length - Delimiter.Length) & vbNewLine
                     End If
-                    Debug.Print(CSV)
 
                     'Output the contents of each DataRow
                     If DT.Rows.Count > 0 Then
@@ -560,7 +816,8 @@ Namespace DataFileToDataTableConverters
 
 
         ''' <summary>
-        ''' Converts the submitted CSV text file into a DataTable
+        ''' Converts the submitted CSV text file into a DataTable using Microsoft.Jet.OLEDB.4.0. NOTE: Any text in mixed text/numeric columns will be converted to blanks 
+        ''' by the OLEDB engine.
         ''' </summary>
         ''' <param name="CSVFileInfo">Input CSV FileInfo</param>
         ''' <param name="Headers">Whether the file has headers or not</param>
@@ -588,11 +845,120 @@ Namespace DataFileToDataTableConverters
         End Function
 
         ''' <summary>
+        ''' Converts the submitted CSV text file to a DataTable using a .NET custom function. This overload may give different results from the OLEDB method.
+        ''' </summary>
+        ''' <param name="CSVFileInfo"></param>
+        ''' <returns></returns>
+        Public Shared Function GetDataTableFromCSV(CSVFileInfo As FileInfo) As DataTable
+            Dim CSVStringDataTable = New DataTable
+            Dim CSVStreamReader As New StreamReader(CSVFileInfo.FullName)
+            Dim CSV As String = CSVStreamReader.ReadToEnd
+            CSVStreamReader.Close()
+            CSVStreamReader.Dispose()
+            Dim CSVLines As String() = CSV.Split(ControlChars.Lf)
+            Dim ColumnsArray As String() = CSVLines(0).Split(","c)
+
+            'Add columns to the data table based on the first row of the csv file
+            For Each ColumnName As String In ColumnsArray
+                CSVStringDataTable.Columns.Add(New DataColumn(ColumnName))
+            Next
+
+            'Add the data rows
+            Dim RowIndex As Integer = 0
+            For Each CSVLine As String In CSVLines
+                'Avoid duplicating the first row containing the column names
+                If RowIndex > 0 Then
+                    Dim NewRow As DataRow = CSVStringDataTable.NewRow
+                    Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
+                    NewRow.ItemArray = CSVFinalLine.Split(","c)
+                    CSVStringDataTable.Rows.Add(NewRow)
+                End If
+
+                RowIndex = RowIndex + 1
+            Next
+
+            Dim ReturnDataTable As New DataTable
+            Debug.Print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--------------------------------------------------------------------------")
+            For Each Col As DataColumn In CSVStringDataTable.Columns
+                Dim NullCounter As Integer = 0
+                Dim BlankCounter As Integer = 0
+
+                Dim DateCounter As Integer = 0
+                Dim IntegerCounter As Integer = 0
+
+                'Loop through the columns
+                If Not Col Is Nothing Then
+                    'Debug.Print(Col.ColumnName)
+                    'And then loop through each row
+                    For Each Row As DataRow In CSVStringDataTable.Rows
+                        If Not Row Is Nothing Then
+
+                            'Determine if the row is null
+                            If Not IsDBNull(Row.Item(Col.ColumnName)) Then
+
+                                'Examine the cell value
+                                Dim CellValue As String = Row.Item(Col.ColumnName).trim
+
+                                'Determine if the cell is blank
+                                If CellValue.Length > 0 Then
+
+                                    'If it's a date then increment the date counter
+                                    If IsDate(CellValue) = True Then DateCounter = DateCounter + 1
+
+                                    If Int32.TryParse(CellValue, New Integer) = True Then IntegerCounter = IntegerCounter + 1
+                                    'Debug.Print(vbTab & CellValue & " IsDate: " & IsDate(CellValue) & " IsInteger" & Int32.TryParse(CellValue, New Integer))
+                                Else
+                                    'Cell is blank
+                                    BlankCounter = BlankCounter + 1
+                                End If
+                            Else
+                                'Cell is NULL
+                                NullCounter = NullCounter + 1
+                            End If
+
+                        End If
+
+                    Next
+                End If
+
+
+                'Create DataColumns in the return data table
+
+                Debug.Print(Col.ColumnName & CSVStringDataTable.Rows.Count & vbTab & NullCounter & vbTab & BlankCounter)
+                'Dim column contains nothing but nulls/blanks
+                If CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = 0 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+
+                'If all the non-null values are dates then the column should be added as a date column type
+                If DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DateCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
+
+                'Determine if all the non-null values are integers or not
+                If IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+
+
+                'Debug.Print("Summary - Rows: " & CSVStringDataTable.Rows.Count & " " & Col.ColumnName & " NULLS: " & NullCounter & " Blanks: " & BlankCounter & " Dates: " & DateCounter ' & " IsDate: " & ColumnIsDate & " IsInteger: " & ColumnIsInteger)
+
+            Next
+            Return ReturnDataTable
+        End Function
+
+        'Private Function GetColumnType(DT As DataTable, ColumnName As String) As String
+        '    'Dim IsString As Boolean = False
+        '    'Dim IsDouble As Boolean = False
+        '    Dim IsDate As Boolean = False
+        '    Dim CountOfValidDates As Integer = 0
+        '    For Each Row As DataRow In DT.Rows
+        '        If IsDate(Row.Item(ColumnName)) = True Then CountOfValidDates = CountOfValidDates + 1
+        '    Next
+
+        'End Function
+
+        ''' <summary>
         ''' Converts a comma separated values string into a DataTable.
         ''' </summary>
         ''' <param name="CSV">Input comma separated values string. String.</param>
         ''' <returns>Output DataTable</returns>
         Public Shared Function GetDataTableFromCSVString(CSV As String) As System.Data.DataTable
+
             Dim CSVDataTable As New DataTable() 'The output DataTable
             Try
 
@@ -631,6 +997,10 @@ Namespace DataFileToDataTableConverters
                     'Increment the counter
                     Counter = Counter + 1
                 Next
+
+
+
+
             Catch ex As Exception
                 MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")")
             End Try
@@ -748,8 +1118,6 @@ Namespace DataFileToDataTableConverters
                 Dim TrueValuesCount As Integer = 0
                 Dim FalseValuesCount As Integer = 0
                 Dim DatesCount As Integer = 0
-                Dim MaxValue As Double
-                Dim MinValue As Double
                 Dim MaxLength As Integer = 0
                 Dim RowCount As Integer = SourceDataTable.Rows.Count
                 Dim Numericity As Decimal = 0
@@ -762,14 +1130,8 @@ Namespace DataFileToDataTableConverters
                     If Not SourceRow Is Nothing Then
                         If Not IsDBNull(SourceRow.Item(SourceColumn.ColumnName)) Then
 
-
                             'Get the cell's value
                             CellValue = SourceRow.Item(SourceColumn.ColumnName)
-
-                            If RowIndex = 0 And IsNumeric(CellValue) Then
-                                MinValue = CDbl(CellValue)
-                                MaxValue = CDbl(CellValue)
-                            End If
 
                             'Max length
                             If CellValue.ToString.Trim.Length > MaxLength Then MaxLength = CellValue.ToString.Trim.Length
@@ -777,13 +1139,6 @@ Namespace DataFileToDataTableConverters
                             'IsNumeric
                             If IsNumeric(CellValue) Then
                                 NumericValuesCount = NumericValuesCount + 1
-
-                                'Max
-                                'If CellValue > MaxValue Then MaxValue = CellValue
-                                'MaxValue = SourceDataTable.Compute("MAX(" & SourceColumn.ColumnName & ")", "")
-
-                                ''Min 
-                                'If CellValue < MinValue Then MinValue = CellValue
 
                                 'IsInteger
                                 If Integer.TryParse(CellValue, vbNull) = True Then SourceColumnIsInteger = True
@@ -931,6 +1286,7 @@ Namespace DataFileToDataTableConverters
                 .Columns.Add("IsBit", GetType(Boolean))
                 .Columns.Add("IsDate", GetType(Boolean))
                 .Columns.Add("Blanks", GetType(Integer))
+                .Columns.Add("NullValues", GetType(Integer))
                 .Columns.Add("NumericValuesCount", GetType(Integer))
                 .Columns.Add("Numericity", GetType(Decimal)) ', "NumericValuesCount / RowCount")
                 .Columns.Add("Max", GetType(String))

@@ -173,7 +173,7 @@ Public Class Form1
         Me.OutputDataGridView.DataSource = Nothing
     End Sub
 
-    Private Sub GetMetadataDatasetFromDataTableButton_Click(sender As Object, e As EventArgs) Handles GetMetadataFromDataTableButton.Click
+    Private Sub GetMetadataDatasetFromDataTableButton_Click(sender As Object, e As EventArgs) Handles GetMetadataDatasetFromDataTableButton.Click
         'Clear the tools
         ClearTools()
 
@@ -186,16 +186,16 @@ Public Class Form1
             'DataTable
             Dim OutputDataTable As DataTable = MetadataDataset.Tables(0)
             Me.OutputDataGridView.DataSource = OutputDataTable
-                Me.OutputGridControl.DataSource = MetadataDataset.Tables(0)
-                Me.OutputGridControl.MainView.PopulateColumns()
+            Me.OutputGridControl.DataSource = MetadataDataset.Tables(0)
+            Me.OutputGridControl.MainView.PopulateColumns()
 
-                'Text
-                Me.OutputTextBox.Text = DataTableToCSV(OutputDataTable, ",")
+            'Text
+            Me.OutputTextBox.Text = DataTableToCSV(OutputDataTable, ",")
 
-                'Object
-                Me.OutputPropertyGrid.SelectedObject = OutputDataTable
+            'Object
+            Me.OutputPropertyGrid.SelectedObject = OutputDataTable
 
-                Me.OutputTabControl.SelectedTab = DataGridViewTabPage
+            Me.OutputTabControl.SelectedTab = DataGridViewTabPage
 
             'Show the data
             ShowDataSetInForm(MetadataDataset)
@@ -243,7 +243,7 @@ Public Class Form1
         Me.OutputTextBox.Text = CS & vbNewLine
 
         'Build the Excel Dataset
-        Dim DS As DataSet = GetDatasetFromExcelWorkbook(CS)
+        Dim DS As DataSet = GetDatasetFromExcelWorkbook(CS, True, True)
 
         'Output some stuff
         Dim DatasetDescription As String = GetDatasetDescription(DS, False)
@@ -402,6 +402,41 @@ Density,0.1699,0.6935,1.4809,0.6024"
             ClearTools()
         Me.OutputTextBox.Text = ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")"
         Me.OutputTabControl.SelectedTab = TextTabPage
+        End Try
+    End Sub
+
+    Private Sub GetMetadataFromDataTableButton_Click(sender As Object, e As EventArgs) Handles GetMetadataFromDataTableButton.Click
+        'Clear the tools
+        ClearTools()
+
+        Try
+            'Dim CSVFile As FileInfo = GetFile("Data files|*.csv", "Select a CSV file.", "C:\Temp")
+            Dim CSVFileInfo As New FileInfo("C:\Temp\zSomeSheepData.csv")
+            'Dim DT As DataTable = GetDataTableFromCSV(New FileInfo(CSVFileInfo.FullName), True, Format.Delimited)
+            Dim DT As DataTable = GetDataTableFromCSV(CSVFileInfo)
+            Using MetadataDataTable As DataTable = GetMetadataFromDataTable(DT)
+                'Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
+
+
+                'DataTable
+                'Dim OutputDataTable As DataTable = MetadataDataset.Tables(0)
+                Me.OutputDataGridView.DataSource = DT
+                Me.OutputGridControl.DataSource = MetadataDataTable
+                Me.OutputGridControl.MainView.PopulateColumns()
+
+                'Text
+                Me.OutputTextBox.Text = DataTableToCSV(MetadataDataTable, ",")
+
+                'Object
+                Me.OutputPropertyGrid.SelectedObject = MetadataDataTable
+
+                Me.OutputTabControl.SelectedTab = DataGridViewTabPage
+
+            End Using
+        Catch ex As Exception
+            ClearTools()
+            Me.OutputTextBox.Text = ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")"
+            Me.OutputTabControl.SelectedTab = TextTabPage
         End Try
     End Sub
 End Class
