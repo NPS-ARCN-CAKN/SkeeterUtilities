@@ -925,14 +925,37 @@ Namespace DataFileToDataTableConverters
                 'Create DataColumns in the return data table
 
                 Debug.Print(Col.ColumnName & CSVStringDataTable.Rows.Count & vbTab & NullCounter & vbTab & BlankCounter)
-                'Dim column contains nothing but nulls/blanks
+
+                'Column contains nothing but nulls/blanks
                 If CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = 0 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
 
                 'If all the non-null values are dates then the column should be added as a date column type
                 If DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DateCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
 
                 'Determine if all the non-null values are integers or not
+                Dim MaxInteger As Integer = CSVStringDataTable.Compute("Max([" & Col.ColumnName & "])", "")
+                Dim MinInteger As Integer = CSVStringDataTable.Compute("Min([" & Col.ColumnName & "])", "")
+                If MaxInteger = 0 Or MaxInteger = 1 And MinInteger = 0 Or MinInteger = 1 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
                 If IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+
+                MsgBox("Resume work on GetDataTableFromCSV")
+                '                System.Boolean
+                '                Byte    System.Byte
+                'SByte   System.SByte
+                'Char    System.Char
+                'Decimal System.Decimal
+                'Double  System.Double
+                'float   System.Single
+                'Int System.Int32
+                'uint    System.UInt32
+                'nint    System.IntPtr
+                'nuint   System.UIntPtr
+                'Long    System.Int64
+                'ULong   System.UInt64
+                'Short   System.Int16
+                'UShort  System.UInt16
+
+
 
 
                 'Debug.Print("Summary - Rows: " & CSVStringDataTable.Rows.Count & " " & Col.ColumnName & " NULLS: " & NullCounter & " Blanks: " & BlankCounter & " Dates: " & DateCounter ' & " IsDate: " & ColumnIsDate & " IsInteger: " & ColumnIsInteger)
