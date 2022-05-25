@@ -850,6 +850,7 @@ Namespace DataFileToDataTableConverters
         ''' <param name="CSVFileInfo"></param>
         ''' <returns></returns>
         Public Shared Function GetDataTableFromCSV(CSVFileInfo As FileInfo) As DataTable
+            Dim ReturnDataTable As New DataTable
             Dim CSVStringDataTable = New DataTable
             Dim CSVStreamReader As New StreamReader(CSVFileInfo.FullName)
             Dim CSV As String = CSVStreamReader.ReadToEnd
@@ -866,30 +867,43 @@ Namespace DataFileToDataTableConverters
             'Add the data rows
             Dim RowIndex As Integer = 0
             For Each CSVLine As String In CSVLines
-                'Avoid duplicating the first row containing the column names
-                If RowIndex > 0 Then
-                    Dim NewRow As DataRow = CSVStringDataTable.NewRow
-                    Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
-                    NewRow.ItemArray = CSVFinalLine.Split(","c)
-                    CSVStringDataTable.Rows.Add(NewRow)
-                End If
+                Debug.Print(RowIndex & CSVLine)
+                'Don't add any blank rows to the data table
+                If CSVLine.Trim <> "" Then
 
+                    'Avoid duplicating the first row containing the column names
+                    If RowIndex > 0 Then
+
+                        Dim NewRow As DataRow = CSVStringDataTable.NewRow
+                        Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
+                        NewRow.ItemArray = CSVFinalLine.Split(","c)
+                        CSVStringDataTable.Rows.Add(NewRow)
+                    End If
+
+                End If
                 RowIndex = RowIndex + 1
             Next
 
-            Dim ReturnDataTable As New DataTable
             Debug.Print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--------------------------------------------------------------------------")
+            'Loop through each column in the CSV string data table
             For Each Col As DataColumn In CSVStringDataTable.Columns
                 Dim NullCounter As Integer = 0
                 Dim BlankCounter As Integer = 0
 
                 Dim DateCounter As Integer = 0
                 Dim IntegerCounter As Integer = 0
+                Dim BooleanCounter As Integer = 0
+                Dim TrueFalseCounter As Integer = 0
+                Dim DecimalCounter As Integer = 0
+                Dim DoubleCounter As Integer = 0
+                Dim SingleCounter As Integer = 0
 
                 'Loop through the columns
                 If Not Col Is Nothing Then
-                    'Debug.Print(Col.ColumnName)
+
+
                     'And then loop through each row
+                    Dim i As Integer = 0
                     For Each Row As DataRow In CSVStringDataTable.Rows
                         If Not Row Is Nothing Then
 
@@ -901,67 +915,204 @@ Namespace DataFileToDataTableConverters
 
                                 'Determine if the cell is blank
                                 If CellValue.Length > 0 Then
+                                    Debug.Print(Col.ColumnName & " " & CellValue & " Double: " & ValueIsDouble(CellValue) & " Integer: " & ValueIsInteger(CellValue) & " Date: " & ValueIsDate(CellValue))
+                                    '    'We have a cell value, determine what the data type is
+                                    '    Debug.Print("ROW " & CellValue & " " & Date.TryParse(CellValue, New Date) & " " & DateTime.TryParse(CellValue, New Date) & " " & IsNumeric(CellValue) & " " & Decimal.TryParse(CellValue, New Decimal) & Single.TryParse(CellValue, New Decimal) & Double.TryParse(CellValue, New Decimal))
+                                    '    'Start by seeing if it's a Date
+                                    '    If IsNumeric(CellValue) = True Then
 
-                                    'If it's a date then increment the date counter
-                                    If IsDate(CellValue) = True Then DateCounter = DateCounter + 1
 
-                                    If Int32.TryParse(CellValue, New Integer) = True Then IntegerCounter = IntegerCounter + 1
-                                    'Debug.Print(vbTab & CellValue & " IsDate: " & IsDate(CellValue) & " IsInteger" & Int32.TryParse(CellValue, New Integer))
-                                Else
-                                    'Cell is blank
-                                    BlankCounter = BlankCounter + 1
+                                    '        'Test for integer, and then for integer variant of boolean (1 or 0)
+                                    '        If Int16.TryParse(CellValue, New Integer) = True Or Int32.TryParse(CellValue, New Integer) = True Or Int64.TryParse(CellValue, New Integer) = True Or UInt16.TryParse(CellValue, New Integer) = True Or UInt32.TryParse(CellValue, New Integer) = True Or UInt64.TryParse(CellValue, New Integer) = True Then
+                                    '            IntegerCounter = IntegerCounter + 1
+                                    '            If CInt(CellValue) = 0 Or CInt(CellValue) = 1 Then
+                                    '                BooleanCounter = BooleanCounter + 1
+                                    '            End If
+                                    '        Else
+                                    '            DoubleCounter = DoubleCounter + 1
+
+                                    '            'Test for Decimal
+                                    '            'ElseIf Decimal.TryParse(CellValue, New Decimal) = True Then
+                                    '            '    DecimalCounter = DecimalCounter + 1
+                                    '            '    'Debug.Print(vbTab & i & " VALUE: " & CellValue & " booleancounter " & BooleanCounter & " intcounter" & IntegerCounter & " IsDate: " & IsDate(CellValue) & " IsInteger" & Int32.TryParse(CellValue, New Integer))
+
+                                    '            '    'Test for double
+                                    '            'ElseIf Double.TryParse(CellValue, New Double) = True Then
+                                    '            '    DoubleCounter = DoubleCounter + 1
+
+                                    '            '    'Test for float (.NET single)
+                                    '            'ElseIf Single.TryParse(CellValue, New Single) = True Then
+                                    '            '    SingleCounter = SingleCounter + 1
+                                    '            'Else
+                                    '            '    'Don't know what it is, but it's numeric, call it double
+                                    '            '    DoubleCounter = DoubleCounter + 1
+                                    '        End If
+
+                                    '    ElseIf Datetime.TryParse(CellValue, New Date) = True Then
+                                    '        'It's a Date
+                                    '        DateCounter = DateCounter + 1
+
+                                    '    Else
+
+
+                                    '        'If it's not Date or numeric as tested above then it's text
+
+                                    '        'Test for text variant of boolean
+                                    '        If CellValue.ToLower = "true" Or CellValue.ToLower = "false" Or CellValue.ToLower = "yes" Or CellValue.ToLower = "no" Or CellValue.ToLower = "y" Or CellValue.ToLower = "n" Or CellValue.ToLower = "t" Or CellValue.ToLower = "f" Then
+                                    '            TrueFalseCounter = TrueFalseCounter + 1
+
+                                    '        End If
+
+
+                                    '        'Cell is blank
+                                    '        BlankCounter = BlankCounter + 1
+                                    '    End If
                                 End If
                             Else
+                                Debug.Print(vbTab & "Row is DBNULL")
+
                                 'Cell is NULL
                                 NullCounter = NullCounter + 1
                             End If
-
+                        Else
+                            Debug.Print(vbTab & "Row is nothing")
                         End If
-
+                        i = i + 1
                     Next
                 End If
 
+                'Debug.Print("-" & Col.ColumnName & " " & SingleCounter & " " & DoubleCounter & " " & DecimalCounter & " " & DoubleCounter & " " & BooleanCounter & " " & IntegerCounter)
 
-                'Create DataColumns in the return data table
+                'Date test
+                'If DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DateCounter Then
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
 
-                Debug.Print(Col.ColumnName & CSVStringDataTable.Rows.Count & vbTab & NullCounter & vbTab & BlankCounter)
+                '    'Integer test
+                'ElseIf IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter And BooleanCounter <> IntegerCounter Then
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
 
-                'Column contains nothing but nulls/blanks
-                If CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = 0 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+                '    'Boolean test
+                'ElseIf IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter And BooleanCounter = IntegerCounter Then
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
 
-                'If all the non-null values are dates then the column should be added as a date column type
-                If DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DateCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
+                '    '    'Decimal test
+                '    'ElseIf DecimalCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DecimalCounter Then
+                '    '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Decimal))
 
-                'Determine if all the non-null values are integers or not
-                Dim MaxInteger As Integer = CSVStringDataTable.Compute("Max([" & Col.ColumnName & "])", "")
-                Dim MinInteger As Integer = CSVStringDataTable.Compute("Min([" & Col.ColumnName & "])", "")
-                If MaxInteger = 0 Or MaxInteger = 1 And MinInteger = 0 Or MinInteger = 1 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
-                If IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+                '    '    'Double test
+                'ElseIf DoubleCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = DoubleCounter Then
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Double))
 
-                MsgBox("Resume work on GetDataTableFromCSV")
-                '                System.Boolean
-                '                Byte    System.Byte
-                'SByte   System.SByte
-                'Char    System.Char
-                'Decimal System.Decimal
-                'Double  System.Double
-                'float   System.Single
-                'Int System.Int32
-                'uint    System.UInt32
-                'nint    System.IntPtr
-                'nuint   System.UIntPtr
-                'Long    System.Int64
-                'ULong   System.UInt64
-                'Short   System.Int16
-                'UShort  System.UInt16
+                '    '    'Single test
+                '    'ElseIf SingleCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = SingleCounter Then
+                '    '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Single))
 
+                '    'True/False test
+                'ElseIf TrueFalseCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = TrueFalseCounter Then
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
 
-
-
-                'Debug.Print("Summary - Rows: " & CSVStringDataTable.Rows.Count & " " & Col.ColumnName & " NULLS: " & NullCounter & " Blanks: " & BlankCounter & " Dates: " & DateCounter ' & " IsDate: " & ColumnIsDate & " IsInteger: " & ColumnIsInteger)
+                'Else
+                '    ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+                'End If
 
             Next
-            Return ReturnDataTable
+
+
+
+
+            'Create DataColumns in the return data table
+
+            'Debug.Print(Col.ColumnName & CSVStringDataTable.Rows.Count & vbTab & NullCounter & vbTab & BlankCounter)
+
+            ''Column contains nothing but nulls/blanks
+            'If CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = 0 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+
+            ''If all the non-null values are dates then the column should be added as a date column type
+            '
+
+            ''Determine if all the non-null values are integers or not
+            'Dim MaxInteger As Integer = CSVStringDataTable.Compute("Max([" & Col.ColumnName & "])", "")
+            'Dim MinInteger As Integer = CSVStringDataTable.Compute("Min([" & Col.ColumnName & "])", "")
+            'If MaxInteger = 0 Or MaxInteger = 1 And MinInteger = 0 Or MinInteger = 1 Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
+            'If IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - BlankCounter = IntegerCounter Then ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+
+            'MsgBox("Resume work On GetDataTableFromCSV")
+            '                System.Boolean
+            '                Byte    System.Byte
+            'SByte   System.SByte
+            'Char    System.Char
+            'Decimal System.Decimal
+            'Double  System.Double
+            'float   System.Single
+            'Int System.Int32
+            'uint    System.UInt32
+            'nint    System.IntPtr
+            'nuint   System.UIntPtr
+            'Long    System.Int64
+            'ULong   System.UInt64
+            'Short   System.Int16
+            'UShort  System.UInt16
+
+
+
+
+            'Debug.Print("Summary - Rows: " & CSVStringDataTable.Rows.Count & " " & Col.ColumnName & " NULLS: " & NullCounter & " Blanks: " & BlankCounter & " Dates: " & DateCounter ' & " IsDate: " & ColumnIsDate & " IsInteger: " & ColumnIsInteger)
+
+
+            Return CSVStringDataTable ' ReturnDataTable
+        End Function
+
+        ''' <summary>
+        ''' Returns true if Value is a Date, otherwise False.
+        ''' </summary>
+        ''' <param name="Value">Value to evaluate. String.</param>
+        ''' <returns></returns>
+        Public Shared Function ValueIsDate(Value As String) As Boolean
+            If Not Value Is Nothing Then
+                If IsNumeric(Value) = False And IsDate(Value) = True Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Else
+                Return False
+            End If
+        End Function
+
+        ''' <summary>
+        ''' Returns true if Value is an Integer, otherwise False.
+        ''' </summary>
+        ''' <param name="Value">Value to evaluate. String.</param>
+        ''' <returns></returns>
+        Public Shared Function ValueIsInteger(Value As String) As Boolean
+            If Not Value Is Nothing Then
+                'Test for integer, and then for integer variant of boolean (1 or 0)
+                If Int16.TryParse(Value, New Integer) = True Or Int32.TryParse(Value, New Integer) = True Or Int64.TryParse(Value, New Integer) = True Or UInt16.TryParse(Value, New Integer) = True Or UInt32.TryParse(Value, New Integer) = True Or UInt64.TryParse(Value, New Integer) = True Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Else
+                Return False
+            End If
+        End Function
+
+        ''' <summary>
+        ''' Returns true if Value is a Double, otherwise False.
+        ''' </summary>
+        ''' <param name="Value">Value to evaluate. String.</param>
+        ''' <returns></returns>
+        Public Shared Function ValueIsDouble(Value As String) As Boolean
+            If Not Value Is Nothing Then
+                'Test for Double
+                If Double.TryParse(Value, New Double) = True Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Else
+                Return False
+            End If
         End Function
 
         'Private Function GetColumnType(DT As DataTable, ColumnName As String) As String

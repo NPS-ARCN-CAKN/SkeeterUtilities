@@ -180,25 +180,30 @@ Public Class Form1
         Try
             Dim CSVFile As FileInfo = GetFile("Data files|*.csv", "Select a CSV file.", "C:\Temp")
             Dim DT As DataTable = GetDataTableFromCSV(New FileInfo(CSVFile.FullName), True, Format.Delimited)
-            Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
+            If Not DT Is Nothing Then
+                Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
 
 
-            'DataTable
-            Dim OutputDataTable As DataTable = MetadataDataset.Tables(0)
-            Me.OutputDataGridView.DataSource = OutputDataTable
-            Me.OutputGridControl.DataSource = MetadataDataset.Tables(0)
-            Me.OutputGridControl.MainView.PopulateColumns()
+                'DataTable
+                Dim OutputDataTable As DataTable = MetadataDataset.Tables(0)
+                Me.OutputDataGridView.DataSource = OutputDataTable
+                Me.OutputGridControl.DataSource = MetadataDataset.Tables(0)
+                Me.OutputGridControl.MainView.PopulateColumns()
 
-            'Text
-            Me.OutputTextBox.Text = DataTableToCSV(OutputDataTable, ",")
+                'Text
+                Me.OutputTextBox.Text = DataTableToCSV(OutputDataTable, ",")
 
-            'Object
-            Me.OutputPropertyGrid.SelectedObject = OutputDataTable
+                'Object
+                Me.OutputPropertyGrid.SelectedObject = OutputDataTable
 
-            Me.OutputTabControl.SelectedTab = DataGridViewTabPage
+                Me.OutputTabControl.SelectedTab = DataGridViewTabPage
 
-            'Show the data
-            ShowDataSetInForm(MetadataDataset)
+                'Show the data
+                ShowDataSetInForm(MetadataDataset)
+            Else
+                MsgBox("Data table is nothing (GetMetadataDatasetFromDataTableButton_Click).")
+            End If
+
         Catch ex As Exception
             ClearTools()
             Me.OutputTextBox.Text = ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")"
