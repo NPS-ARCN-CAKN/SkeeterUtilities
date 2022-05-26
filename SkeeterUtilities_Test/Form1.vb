@@ -415,29 +415,33 @@ Density,0.1699,0.6935,1.4809,0.6024"
         ClearTools()
 
         Try
-            'Dim CSVFile As FileInfo = GetFile("Data files|*.csv", "Select a CSV file.", "C:\Temp")
-            Dim CSVFileInfo As New FileInfo("C:\Temp\zSomeSheepData.csv")
+
+            'Transform a CSV into a DataTable
+            Dim CSVFileInfo As FileInfo = GetFile("Data files|*.csv", "Select a CSV file.", "C:\Temp")
+            'Dim CSVFileInfo As New FileInfo("C:\Temp\zSomeSheepData.csv")
             'Dim DT As DataTable = GetDataTableFromCSV(New FileInfo(CSVFileInfo.FullName), True, Format.Delimited)
             Dim DT As DataTable = GetDataTableFromCSV(CSVFileInfo)
-            Using MetadataDataTable As DataTable = GetMetadataFromDataTable(DT)
-                'Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
+
+            'Get Metadata from the CSV DataTable
+            Dim MetadataDataTable As DataTable = GetMetadataFromDataTable(DT)
+            ''Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
 
 
-                'DataTable
-                'Dim OutputDataTable As DataTable = MetadataDataset.Tables(0)
-                Me.OutputDataGridView.DataSource = DT
-                Me.OutputGridControl.DataSource = MetadataDataTable
-                Me.OutputGridControl.MainView.PopulateColumns()
+            ''DataTable
 
-                'Text
-                Me.OutputTextBox.Text = DataTableToCSV(MetadataDataTable, ",")
+            Me.OutputDataGridView.DataSource = DT
+            Me.OutputGridControl.DataSource = MetadataDataTable
+            Me.OutputGridControl.MainView.PopulateColumns()
 
-                'Object
-                Me.OutputPropertyGrid.SelectedObject = MetadataDataTable
+            '    'Text
+            Me.OutputTextBox.Text = DataTableToCSV(MetadataDataTable, ",")
 
-                Me.OutputTabControl.SelectedTab = DataGridViewTabPage
+            '    'Object
+            Me.OutputPropertyGrid.SelectedObject = MetadataDataTable
 
-            End Using
+            Me.OutputTabControl.SelectedTab = DataGridViewTabPage
+
+
         Catch ex As Exception
             ClearTools()
             Me.OutputTextBox.Text = ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")"
