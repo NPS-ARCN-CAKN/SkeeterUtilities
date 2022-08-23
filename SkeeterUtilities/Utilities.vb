@@ -1303,7 +1303,7 @@ Namespace DataFileToDataTableConverters
         ''' <param name="Filename">Filename. Optional. String.</param>
         ''' <param name="Worksheet">Worksheet. Optional. String.</param>
         ''' <param name="Separator">Values separator. Optional. String.</param>
-        ''' <returns></returns>
+        ''' <returns>DataTable.</returns>
         Public Shared Function GetMetadataDatasetFromDataTable(SourceDataTable As DataTable, Optional Filename As String = "", Optional Worksheet As String = "", Optional Separator As String = "|") As DataSet
             'Return Dataset
             Dim MetadataDataset As New DataSet(SourceDataTable.TableName)
