@@ -135,8 +135,7 @@ Namespace DataFileToDataTableConverters
         ''' Returns a DataTable of information about SourceDataTable.
         ''' </summary>
         ''' <param name="SourceDataTable">Source data table. DataTable.</param>
-        ''' <param name="UniqueValuesSeparator">One thing that is returned for each column of SourceDataTable is a list of unique values. 
-        ''' These unique values will be separated by UniqueValuesSeparator.</param>
+        ''' <param name="UniqueValuesSeparator">One thing that is returned for each column of SourceDataTable is a list of unique values. These unique values will be separated by UniqueValuesSeparator.</param>
         ''' <returns></returns>
         Public Shared Function GetMetadataFromDataTable(SourceDataTable As DataTable, Optional UniqueValuesSeparator As String = ",", Optional Filename As String = "", Optional Worksheet As String = "") As DataTable
 
@@ -1297,7 +1296,14 @@ Namespace DataFileToDataTableConverters
 
 
 
-
+        ''' <summary>
+        ''' Returns metadata on SourceDataTable. Metadata on SourceDataTable will be in a parent table and unique values in a sub-table.
+        ''' </summary>
+        ''' <param name="SourceDataTable">DataTable to interrogate. DataTable.</param>
+        ''' <param name="Filename">Filename. Optional. String.</param>
+        ''' <param name="Worksheet">Worksheet. Optional. String.</param>
+        ''' <param name="Separator">Values separator. Optional. String.</param>
+        ''' <returns></returns>
         Public Shared Function GetMetadataDatasetFromDataTable(SourceDataTable As DataTable, Optional Filename As String = "", Optional Worksheet As String = "", Optional Separator As String = "|") As DataSet
             'Return Dataset
             Dim MetadataDataset As New DataSet(SourceDataTable.TableName)
