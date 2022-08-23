@@ -24,6 +24,9 @@ Public Class Form1
             'DataTable
             Me.OutputDataGridView.DataSource = DT
 
+            'Metadata to GridControl
+            Me.OutputGridControl.DataSource = GetMetadataFromDataTable(DT)
+
             'Text
             Me.OutputTextBox.Text = DataTableToCSV(DT, "|")
 
@@ -423,7 +426,7 @@ Density,0.1699,0.6935,1.4809,0.6024"
             Dim DT As DataTable = GetDataTableFromCSV(CSVFileInfo)
 
             'Get Metadata from the CSV DataTable
-            Dim MetadataDataTable As DataTable = GetMetadataFromDataTable(DT)
+            Dim MetadataDataTable As DataTable = GetMetadataFromDataTable(DT, ",", CSVFileInfo.Name, "Worksheet name would go here")
             ''Dim MetadataDataset As DataSet = GetMetadataDatasetFromDataTable(DT, CSVFile.Name, "TEST")
 
 

@@ -138,7 +138,7 @@ Namespace DataFileToDataTableConverters
         ''' <param name="UniqueValuesSeparator">One thing that is returned for each column of SourceDataTable is a list of unique values. 
         ''' These unique values will be separated by UniqueValuesSeparator.</param>
         ''' <returns></returns>
-        Public Shared Function GetMetadataFromDataTable(SourceDataTable As DataTable, Optional UniqueValuesSeparator As String = ",") As DataTable
+        Public Shared Function GetMetadataFromDataTable(SourceDataTable As DataTable, Optional UniqueValuesSeparator As String = ",", Optional Filename As String = "", Optional Worksheet As String = "") As DataTable
 
             'Build a data table to hold metadata
             Dim MetadataDataTable As DataTable = GetMetadataDataTable()
@@ -149,31 +149,20 @@ Namespace DataFileToDataTableConverters
 
             'Loop through the columns in the data table and build up metadata
             For Each SourceColumn As DataColumn In SourceDataTable.Columns
-                Dim NewMetadataRow As DataRow = MetadataDataTable.NewRow
 
-
-                Dim SourceColumnIsNumeric As Boolean = True
-                Dim SourceColumnIsBit As Boolean = True
-                Dim SourceColumnIsInteger As Boolean = False
-                Dim SourceColumnIsDate As Boolean = True
-                Dim SourceColumnIsBlank As Boolean = False
 
                 'Loop through each row in the column
-                Dim RowIndex As Integer = 0
                 Dim BlankCount As Integer = 0
                 Dim NullCount As Integer = 0
                 Dim NumericValuesCount As Integer = 0
                 Dim BitValuesCount As Integer = 0
                 Dim TrueValuesCount As Integer = 0
                 Dim FalseValuesCount As Integer = 0
-                Dim DatesCount As Integer = 0
+                Dim DateValuesCount As Integer = 0
                 Dim MaxLength As Integer = 0
-                Dim RowCount As Integer = SourceDataTable.Rows.Count
-                Dim Numericity As Decimal = 0
-                Dim Bitness As Decimal = 0
-                Dim Dateness As Decimal = 0
 
                 'Loop through the rows
+                Dim RowIndex As Integer = 0
                 For Each SourceRow As DataRow In SourceDataTable.Rows
 
                     'Make sure we have a row
@@ -182,82 +171,92 @@ Namespace DataFileToDataTableConverters
                         'Make sure the SourceRow's cell is not nothing
                         If Not SourceRow.Item(SourceColumn.ColumnName) Is Nothing Then
 
-                            'Make sure the cell is not null
-                            If IsDBNull(SourceRow.Item(SourceColumn.ColumnName)) Then
+                            'See if the cell value is null
+                            If IsDBNull(SourceRow.Item(SourceColumn.ColumnName)) = False Then
 
-                                'The cell is null
-                                NullCount = NullCount + 1
-
-                            ElseIf SourceRow.Item(SourceColumn.ColumnName).ToString.Length = 0 Then
-
-                                'The cell is blank
-                                BlankCount = BlankCount + 1
-
-                            Else
-                                'Cell is not null and not blank, process it
-
-                                'Get the cell's value
+                                'Get the cell value
                                 Dim CellValue As String = SourceRow.Item(SourceColumn.ColumnName).ToString.Trim
 
-                                'Max length
-                                If CellValue.Length > MaxLength Then MaxLength = CellValue.Length
+                                'Determine if the cell value is not a blank (a zero length string)
+                                If CellValue.Length > 0 Then
+                                    'We have a valid value, now study it
 
-                                'IsNumeric
-                                If IsNumeric(CellValue) Then
-                                    NumericValuesCount = NumericValuesCount + 1
+                                    'Max length: Make it longer if needed
+                                    If CellValue.Length > MaxLength Then MaxLength = CellValue.Length
+
+                                    'IsNumeric
+                                    If IsNumeric(CellValue) Then
+                                        NumericValuesCount = NumericValuesCount + 1
+                                    End If
+
+                                    'Get the bitness
+                                    If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
+                                        TrueValuesCount = TrueValuesCount + 1
+                                    ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
+                                        FalseValuesCount = FalseValuesCount + 1
+                                    End If
+                                    BitValuesCount = TrueValuesCount + FalseValuesCount
+
+                                    'Determine if CellValue is a Date
+                                    '.NET will say a number is a date, even though it's a number. 1.33 is interpreted as a date, if you can believe it
+                                    'so check that it's not a number first.
+                                    If IsNumeric(CellValue) = False Then
+                                        If IsDate(CellValue) = True Then DateValuesCount = DateValuesCount + 1
+                                    End If
+
+
+                                    'Debug.Print(vbNewLine & SourceColumn.ColumnName & " " & RowIndex & " Value: " & CellValue & " Blanks: " & BlankCount & " Nulls: " & NullCount)
+                                    'Debug.Print(vbTab & "MaxLength: " & MaxLength)
+                                    'Debug.Print(vbTab & "NumericValuesCount: " & NumericValuesCount)
+                                    'Debug.Print(vbTab & "BitValuesCount: " & BitValuesCount & vbTab & TrueValuesCount & " " & FalseValuesCount)
+                                    'Debug.Print(vbTab & "DatesCount: " & DatesCount)
+
+                                Else
+                                        'Cell is blank, increment the blank counter
+                                        BlankCount = BlankCount + 1
                                 End If
+                            Else
+                                'Cell value is null, increment the null counter
+                                NullCount = NullCount + 1
                             End If
-
-
-
-                            '    
-
-                            '    
-
-                            '    ''Get the bitness
-                            '    'If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
-                            '    '    TrueValuesCount = TrueValuesCount + 1
-                            '    'ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
-                            '    '    FalseValuesCount = FalseValuesCount + 1
-                            '    'End If
-
-                            '    ''IsBit
-                            '    'If CellValue.ToString.Trim <> "1" And CellValue.ToString.Trim <> "0" Then
-                            '    '    SourceColumnIsBit = False
-                            '    'End If
-
-                            '    ''IsDate
-                            '    'If IsDate(CellValue) = True Then DatesCount = DatesCount + 1 Else SourceColumnIsDate = False
-
-                            '    ''If any cell values are not numeric then the column is not numeric
-                            '    'If CellValue.ToString.Trim <> "" Then
-                            '    '    If IsNumeric(CellValue) = False Then SourceColumnIsNumeric = False
-                            '    'Else
-                            '    '    'Blank, increment the blank counter
-                            '    '    BlankCount = BlankCount + 1
-                            '    'End If
-                            'Else
-                            '    BlankCount = BlankCount + 1
-                            'End If
                         End If
                     End If
+
                     RowIndex = RowIndex + 1
                 Next
 
-                'Bitness
-                If FalseValuesCount > 0 Then SourceColumnIsBit = False
+                'Column data type identifiers
+                Dim SourceColumnIsNumeric As Boolean = False
+                Dim SourceColumnIsBit As Boolean = False
+                Dim SourceColumnIsInteger As Boolean = False
+                Dim SourceColumnIsDate As Boolean = False
+                Dim SourceColumnIsBlank As Boolean = False
 
-                'Dateness
-                If RowCount - BlankCount > 0 Then
-                    Dateness = DatesCount / (RowCount - BlankCount)
-                End If
+                'Calculate affinity for a data type
+                Dim Numericity As Decimal = 0
+                Dim Bitness As Decimal = 0
+                Dim Dateness As Decimal = 0
 
+                'Get a count of valid, non-null and non-blank rows
+                Dim ValidRowsCount As Integer = SourceDataTable.Rows.Count - BlankCount - NullCount
+                If ValidRowsCount = 0 Then SourceColumnIsBlank = True
+
+                'Numericity --------------------------------------------------------------------------------
+                If ValidRowsCount > 0 Then Numericity = NumericValuesCount / ValidRowsCount
+                If Numericity = 1 Then SourceColumnIsNumeric = True
+
+                'Bitness ----------------------------------------------------------------------------------
+                If ValidRowsCount = BitValuesCount Then SourceColumnIsBit = True
+                If ValidRowsCount > 0 Then Bitness = BitValuesCount / ValidRowsCount
+
+                'Dateness ------------------------------------------------------------------------------------------------
+                If ValidRowsCount > 0 Then Dateness = DateValuesCount / ValidRowsCount
+                If Dateness = 1 Then SourceColumnIsDate = True
 
                 'Now get all the distinct values
                 Dim ColumnNames() As String = {SourceColumn.ColumnName}
                 Dim UniqueValuesDataTable As DataTable = SourceDataTable.DefaultView.ToTable(True, ColumnNames)
                 Dim UniqueValues As String = ""
-                'Dim CSVSeparator As String = ","
 
                 'Build a separated string of unique values
                 For Each Row As DataRow In UniqueValuesDataTable.Rows
@@ -270,22 +269,25 @@ Namespace DataFileToDataTableConverters
                     End If
                 Next
 
-                'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
-                If BlankCount = RowCount Then
+                '    'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
+                If BlankCount + NullCount = SourceDataTable.Rows.Count Then
                     SourceColumnIsNumeric = False
                     SourceColumnIsBit = False
                     SourceColumnIsDate = False
                     SourceColumnIsBlank = True
                 End If
 
-                'Get at numericity
-                If RowCount - BlankCount > 0 Then Numericity = NumericValuesCount / (RowCount - BlankCount) Else Numericity = 0
+
+
+                'Add metadata row
+                Dim NewMetadataRow As DataRow = MetadataDataTable.NewRow
                 With NewMetadataRow
-                    '.Item("Filename") = Filename
-                    ' .Item("Worksheet") = Worksheet
+                    .Item("Filename") = Filename
+                    .Item("Worksheet") = Worksheet
                     .Item("TableName") = SourceColumn.Table.TableName
                     .Item("ColumnName") = SourceColumn.ColumnName
                     .Item("Caption") = SourceColumn.Caption
+                    .Item("Description") = SourceColumn.Caption
                     .Item("DataType") = SourceColumn.DataType.ToString.Replace("System.", "")
                     .Item("AllowDBNull") = SourceColumn.AllowDBNull
                     .Item("AutoIncrement") = SourceColumn.AutoIncrement
@@ -297,15 +299,16 @@ Namespace DataFileToDataTableConverters
                     .Item("IsBit") = SourceColumnIsBit
                     .Item("Bitness") = Bitness
                     .Item("Blanks") = BlankCount
+                    .Item("Nulls") = NullCount
                     .Item("IsBlank") = SourceColumnIsBlank
-                    .Item("UniqueValues") = UniqueValues
+                    '.Item("UniqueValues") = UniqueValues
                     .Item("NumericValuesCount") = NumericValuesCount
                     .Item("Numericity") = Numericity
                     .Item("BitValuesCount") = TrueValuesCount + FalseValuesCount
                     .Item("TrueValuesCount") = TrueValuesCount
                     .Item("FalseValuesCount") = FalseValuesCount
-                    .Item("RowCount") = RowCount
-                    .Item("DatesCount") = DatesCount
+                    .Item("RowCount") = SourceDataTable.Rows.Count
+                    .Item("DatesCount") = DateValuesCount
                     .Item("Dateness") = Dateness
                     .Item("IsDate") = SourceColumnIsDate
                     .Item("Max") = SourceDataTable.Compute("Max([" & SourceColumn.ColumnName & "])", "")
@@ -313,18 +316,18 @@ Namespace DataFileToDataTableConverters
                 End With
                 MetadataDataTable.Rows.Add(NewMetadataRow)
 
-                'add the column's unique values to the unique values datatable
-                For Each Row As DataRow In UniqueValuesDataTable.Rows
-                    If Not Row.Item(0) Is Nothing Then
-                        If Not IsDBNull(Row.Item(0)) Then
-                            'Make a new row for the unique values data table
-                            Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
-                            NewUniqueValuesRow.Item("ColumnName") = SourceColumn.ColumnName
-                            NewUniqueValuesRow.Item("UniqueValue") = Row.Item(0)
-                            MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
-                        End If
-                    End If
-                Next
+                '    'add the column's unique values to the unique values datatable
+                '    For Each Row As DataRow In UniqueValuesDataTable.Rows
+                '        If Not Row.Item(0) Is Nothing Then
+                '            If Not IsDBNull(Row.Item(0)) Then
+                '                'Make a new row for the unique values data table
+                '                Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
+                '                NewUniqueValuesRow.Item("ColumnName") = SourceColumn.ColumnName
+                '                NewUniqueValuesRow.Item("UniqueValue") = Row.Item(0)
+                '                MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
+                '            End If
+                '        End If
+                '    Next
             Next
             Return MetadataDataTable
         End Function
@@ -833,7 +836,10 @@ Namespace DataFileToDataTableConverters
             End Select
             Try
                 Dim CSVConnectionString As String = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & CSVFileInfo.DirectoryName & ";Extended Properties=""text;HDR=" & Headers & ";FMT=" & FMT & """;"
-                Using MyOleDBDataAdapter As New OleDbDataAdapter("SELECT * FROM [" & CSVFileInfo.Name & "]", CSVConnectionString)
+                'CSVConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & CSVFileInfo.FullName & ";Extended Properties="";IMEX=1;HDR=" & Headers & ";FMT=" & FMT & """;"
+                'imex=1; could not find installable isam
+                '
+                Using MyOleDBDataAdapter As New OleDbDataAdapter("Select * FROM [" & CSVFileInfo.Name & "]", CSVConnectionString)
                     MyOleDBDataAdapter.Fill(MyDataTable)
                 End Using
                 MyDataTable.TableName = CSVFileInfo.Name
@@ -953,7 +959,7 @@ Namespace DataFileToDataTableConverters
                                         Else
 
                                             'It's a String. See if it's boolean.
-                                            If CellValue.ToLower = "true" Or CellValue.ToLower = "false" Or CellValue.ToLower = "t" Or CellValue.ToLower = "f" Or CellValue.ToLower = "y" Or CellValue.ToLower = "n" Or CellValue.ToLower = "yes" Or CellValue.ToLower = "no" Then
+                                            If CellValue.ToLower = "True" Or CellValue.ToLower = "False" Or CellValue.ToLower = "t" Or CellValue.ToLower = "f" Or CellValue.ToLower = "y" Or CellValue.ToLower = "n" Or CellValue.ToLower = "yes" Or CellValue.ToLower = "no" Then
                                                 'Value is boolean text.
                                                 BooleanCounter = BooleanCounter + 1
                                             Else
@@ -1021,29 +1027,23 @@ Namespace DataFileToDataTableConverters
 
 
 
-                'Debug.Print("UNFIXED string booleans -----------------------------------")
+                'Debug.Print("UNFIXED String booleans -----------------------------------")
                 'Debug.Print(DataTableToCSV(CSVStringDataTable, ","))
-                'Debug.Print("UNFIXED string booleans -----------------------------------")
+                'Debug.Print("UNFIXED String booleans -----------------------------------")
 
                 'Fix all the text booleans
                 'Convert all the text booleans to True/False
                 For Each Col As DataColumn In CSVStringDataTable.Columns
                     For Each CSVRow As DataRow In CSVStringDataTable.Rows
-                        If CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "true" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "t" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "y" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "yes" Then
+                        If CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "True" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "t" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "y" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "yes" Then
                             CSVRow.Item(Col.ColumnName) = True
-                        ElseIf CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "false" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "f" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "n" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "no" Then
+                        ElseIf CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "False" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "f" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "n" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "no" Then
                             CSVRow.Item(Col.ColumnName) = False
                         End If
                     Next
                 Next
 
-                'Debug.Print("FIXED string booleans -----------------------------------")
-                'Debug.Print(DataTableToCSV(CSVStringDataTable))
-                'Debug.Print("FIXED string booleans -----------------------------------")
 
-                For Each C As DataColumn In ReturnDataTable.Columns
-                    Debug.Print(C.ColumnName & " " & C.DataType.ToString)
-                Next
 
                 'Now load the data from the all String DataTable into ReturnDataTable with the corrected data types
                 Dim i As Integer = 0
@@ -1061,7 +1061,7 @@ Namespace DataFileToDataTableConverters
                 Next
 
             Catch SAEx As ArgumentException
-                MsgBox(SAEx.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")" & vbNewLine & vbNewLine & "The most common cause of this error is a datum containing one or more commas. The comma separated values parser cannot parse data containing commas. Remove any commas from the data and try again.")
+                MsgBox(SAEx.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")" & vbNewLine & vbNewLine & "The most common cause Of this Error Is a datum containing one Or more commas. The comma separated values parser cannot parse data containing commas. Remove any commas from the data And Try again.")
             Catch ex As Exception
                 MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")", MsgBoxStyle.OkOnly, "Exception")
             End Try
@@ -1078,7 +1078,7 @@ Namespace DataFileToDataTableConverters
         '''' <returns></returns>
         'Public Shared Function ValueIsTextBoolean(Value As String) As Boolean
         '    If Not Value Is Nothing Then
-        '        If Value.ToLower = "true" Or Value.ToLower = "false" Or Value.ToLower = "yes" Or Value.ToLower = "no" Or Value.ToLower = "y" Or Value.ToLower = "n" Or Value.ToLower = "t" Or Value.ToLower = "f" Then
+        '        If Value.ToLower = "True" Or Value.ToLower = "False" Or Value.ToLower = "yes" Or Value.ToLower = "no" Or Value.ToLower = "y" Or Value.ToLower = "n" Or Value.ToLower = "t" Or Value.ToLower = "f" Then
         '            Return True
         '        Else
         '            Return False
@@ -1097,9 +1097,9 @@ Namespace DataFileToDataTableConverters
         '    Dim ReturnValue As Integer = Nothing
         '    If Not Value Is Nothing Then
         '        If ValueIsTextBoolean(Value) = True Then
-        '            If Value.ToLower = "true" Or Value.ToLower = "yes" Or Value.ToLower = "y" Or Value.ToLower = "t" Then
+        '            If Value.ToLower = "True" Or Value.ToLower = "yes" Or Value.ToLower = "y" Or Value.ToLower = "t" Then
         '                ReturnValue = 1
-        '            ElseIf Value.ToLower = "false" Or Value.ToLower = "no" Or Value.ToLower = "n" Or Value.ToLower = "f" Then
+        '            ElseIf Value.ToLower = "False" Or Value.ToLower = "no" Or Value.ToLower = "n" Or Value.ToLower = "f" Then
         '                ReturnValue = 0
         '            End If
         '        End If
@@ -1275,7 +1275,7 @@ Namespace DataFileToDataTableConverters
                 Dim MyConnectionString As String = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & DBFDirectory & ";Extended Properties=dBASE IV;User ID=Admin;Password=;"
                 Dim MyConnection As New OleDbConnection(MyConnectionString)
                 MyConnection.Open()
-                Dim Sql As String = "SELECT * FROM [" & TemporaryDBFFilename.Replace(".dbf", "") & "]"
+                Dim Sql As String = "Select * FROM [" & TemporaryDBFFilename.Replace(".dbf", "") & "]"
                 Dim MyCommand As New OleDbCommand(Sql, MyConnection)
                 Dim MyDataReader As OleDbDataReader = MyCommand.ExecuteReader()
 
@@ -1288,7 +1288,7 @@ Namespace DataFileToDataTableConverters
                 'delete the temporary dbf file
                 My.Computer.FileSystem.DeleteFile(TemporaryDBFFileFullName)
             Catch ex As Exception
-                MsgBox("Could not import waypoints from DBF file. " & ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name)
+                MsgBox("Could Not import waypoints from DBF file. " & ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name)
             End Try
             Return DBFDataTable
         End Function
@@ -1364,9 +1364,9 @@ Namespace DataFileToDataTableConverters
                             End If
 
                             'Get the bitness
-                            If CellValue.ToString.ToLower = "true" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
+                            If CellValue.ToString.ToLower = "True" Or CellValue.ToString.ToLower = "t" Or CellValue.ToString.Trim = "1" Or CellValue.ToString.ToLower = "yes" Or CellValue.ToString.ToLower = "y" Then
                                 TrueValuesCount = TrueValuesCount + 1
-                            ElseIf CellValue.ToString.ToLower = "false" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
+                            ElseIf CellValue.ToString.ToLower = "False" Or CellValue.ToString.ToLower = "f" Or CellValue.ToString.Trim = "0" Or CellValue.ToString.ToLower = "no" Or CellValue.ToString.ToLower = "n" Then
                                 FalseValuesCount = FalseValuesCount + 1
                             End If
 
@@ -1482,7 +1482,7 @@ Namespace DataFileToDataTableConverters
         ''' Returns a new, empty, MetadataDataTable. Not to be confused with GetMetadataFromDataTable.
         ''' </summary>
         ''' <returns>MetadataDataTable. DataTable.</returns>
-        Public Shared Function GetMetadataDataTable() As DataTable
+        Private Shared Function GetMetadataDataTable() As DataTable
             Dim DT As New DataTable("Metadata")
             With DT
 
@@ -1503,7 +1503,7 @@ Namespace DataFileToDataTableConverters
                 .Columns.Add("IsBit", GetType(Boolean))
                 .Columns.Add("IsDate", GetType(Boolean))
                 .Columns.Add("Blanks", GetType(Integer))
-                .Columns.Add("NullValues", GetType(Integer))
+                .Columns.Add("Nulls", GetType(Integer))
                 .Columns.Add("NumericValuesCount", GetType(Integer))
                 .Columns.Add("Numericity", GetType(Decimal)) ', "NumericValuesCount / RowCount")
                 .Columns.Add("Max", GetType(String))
@@ -1667,7 +1667,7 @@ Namespace DataFileToDataTableConverters
             Dim Sql As String = ""
             MsgBox("Not functional yet. (GetCreateTableQuery())")
             'Try
-            '    Sql = Sql & "--Best guess at columns and datatypes from the metadata available in the source dataset.  Examine and modify as needed" & vbNewLine
+            '    Sql = Sql & "--Best guess at columns And datatypes from the metadata available In the source dataset.  Examine And modify As needed" & vbNewLine
             '    Sql = Sql & "CREATE TABLE " & NewTableName & "(" & vbNewLine
             '    Dim CurrentDataTable As DataTable = DataView.ToTable
             '    For Each Col As DataColumn In CurrentDataTable.Columns
