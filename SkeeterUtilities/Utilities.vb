@@ -218,6 +218,7 @@ Namespace DataFileToDataTableConverters
                             Else
                                 'Cell value is null, increment the null counter
                                 NullCount = NullCount + 1
+                                BlankCount = BlankCount + 1
                             End If
                         End If
                     End If
@@ -270,7 +271,7 @@ Namespace DataFileToDataTableConverters
                 Next
 
                 '    'We can only guess at column types if there is data in the column. If the entire column is blank then reset everything.
-                If BlankCount + NullCount = SourceDataTable.Rows.Count Then
+                If BlankCount = SourceDataTable.Rows.Count Or NullCount = SourceDataTable.Rows.Count Then
                     SourceColumnIsNumeric = False
                     SourceColumnIsBit = False
                     SourceColumnIsDate = False
@@ -316,18 +317,18 @@ Namespace DataFileToDataTableConverters
                 End With
                 MetadataDataTable.Rows.Add(NewMetadataRow)
 
-                '    'add the column's unique values to the unique values datatable
-                '    For Each Row As DataRow In UniqueValuesDataTable.Rows
-                '        If Not Row.Item(0) Is Nothing Then
-                '            If Not IsDBNull(Row.Item(0)) Then
-                '                'Make a new row for the unique values data table
-                '                Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
-                '                NewUniqueValuesRow.Item("ColumnName") = SourceColumn.ColumnName
-                '                NewUniqueValuesRow.Item("UniqueValue") = Row.Item(0)
-                '                MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
-                '            End If
-                '        End If
-                '    Next
+                'add the column's unique values to the unique values datatable
+                For Each Row As DataRow In UniqueValuesDataTable.Rows
+                    If Not Row.Item(0) Is Nothing Then
+                        If Not IsDBNull(Row.Item(0)) Then
+                            'Make a new row for the unique values data table
+                            Dim NewUniqueValuesRow As DataRow = MetadataUniqueValuesDataTable.NewRow
+                            NewUniqueValuesRow.Item("ColumnName") = SourceColumn.ColumnName
+                            NewUniqueValuesRow.Item("UniqueValue") = Row.Item(0)
+                            MetadataUniqueValuesDataTable.Rows.Add(NewUniqueValuesRow)
+                        End If
+                    End If
+                Next
             Next
             Return MetadataDataTable
         End Function
