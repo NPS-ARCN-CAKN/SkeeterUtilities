@@ -87,21 +87,26 @@ Public Class Form1
 
         Try
             Dim MyFileInfo As FileInfo = GetFile("*|*", "Select a directory", "C:\Temp")
-            Dim DirInfo As New DirectoryInfo(MyFileInfo.DirectoryName)
+            If Not MyFileInfo Is Nothing Then
+                Dim DirInfo As New DirectoryInfo(MyFileInfo.DirectoryName)
 
-            'Dim DirInfo As New DirectoryInfo(Me.GetAListOfSubdirectoriesAndFilesInADirectoryTextBox.Text)
+                'Dim DirInfo As New DirectoryInfo(Me.GetAListOfSubdirectoriesAndFilesInADirectoryTextBox.Text)
 
-            'Text
-            Dim Result As String = GetContentsOfDirectory(DirInfo, "|")
-            Me.OutputTextBox.Text = Result
+                'Text
+                Dim Result As String = GetContentsOfDirectory(DirInfo, "|")
+                Me.OutputTextBox.Text = Result
 
-            'DataTable
-            Dim DT As DataTable = GetContentsOfDirectoryAsDataTable(DirInfo)
-            Me.OutputDataGridView.DataSource = DT
-            Me.OutputTabControl.SelectedTab = Me.DataGridViewTabPage
+                'DataTable
+                Dim DT As DataTable = GetContentsOfDirectoryAsDataTable(DirInfo)
+                Me.OutputDataGridView.DataSource = DT
+                Me.OutputTabControl.SelectedTab = Me.DataGridViewTabPage
 
-            'Object
-            Me.OutputPropertyGrid.SelectedObject = DT
+                'Object
+                Me.OutputPropertyGrid.SelectedObject = DT
+            Else
+                MsgBox("There was a problem getting the directory from the file you selected. Canceled.")
+            End If
+
 
         Catch ex As Exception
             ClearTools()

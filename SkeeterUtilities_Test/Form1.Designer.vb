@@ -28,6 +28,7 @@ Partial Class Form1
         Me.GetFileButton = New System.Windows.Forms.Button()
         Me.GetDirectoryContentsButton = New System.Windows.Forms.Button()
         Me.SplitContainer1 = New System.Windows.Forms.SplitContainer()
+        Me.GetMetadataFromDataTableButton = New System.Windows.Forms.Button()
         Me.DataTableFromSQLServerButton = New System.Windows.Forms.Button()
         Me.TransposeADataTableButton = New System.Windows.Forms.Button()
         Me.PDFTableToDataTableButton = New System.Windows.Forms.Button()
@@ -56,7 +57,6 @@ Partial Class Form1
         Me.PropertyGridTabPage = New System.Windows.Forms.TabPage()
         Me.OutputPropertyGrid = New System.Windows.Forms.PropertyGrid()
         Me.DevExpressMapTabPage = New System.Windows.Forms.TabPage()
-        Me.GetMetadataFromDataTableButton = New System.Windows.Forms.Button()
         CType(Me.SplitContainer1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SplitContainer1.Panel1.SuspendLayout()
         Me.SplitContainer1.Panel2.SuspendLayout()
@@ -78,10 +78,10 @@ Partial Class Form1
         'DataTableFromCSVButton
         '
         Me.DataTableFromCSVButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DataTableFromCSVButton.Location = New System.Drawing.Point(13, 237)
-        Me.DataTableFromCSVButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DataTableFromCSVButton.Location = New System.Drawing.Point(17, 292)
+        Me.DataTableFromCSVButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DataTableFromCSVButton.Name = "DataTableFromCSVButton"
-        Me.DataTableFromCSVButton.Size = New System.Drawing.Size(199, 28)
+        Me.DataTableFromCSVButton.Size = New System.Drawing.Size(265, 34)
         Me.DataTableFromCSVButton.TabIndex = 0
         Me.DataTableFromCSVButton.Text = "DataTable from CSV..."
         Me.DataTableFromCSVButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -90,10 +90,10 @@ Partial Class Form1
         'GetFileButton
         '
         Me.GetFileButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetFileButton.Location = New System.Drawing.Point(13, 46)
-        Me.GetFileButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.GetFileButton.Location = New System.Drawing.Point(17, 57)
+        Me.GetFileButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GetFileButton.Name = "GetFileButton"
-        Me.GetFileButton.Size = New System.Drawing.Size(199, 23)
+        Me.GetFileButton.Size = New System.Drawing.Size(265, 28)
         Me.GetFileButton.TabIndex = 1
         Me.GetFileButton.Text = "Get file..."
         Me.GetFileButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -102,10 +102,10 @@ Partial Class Form1
         'GetDirectoryContentsButton
         '
         Me.GetDirectoryContentsButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetDirectoryContentsButton.Location = New System.Drawing.Point(13, 73)
-        Me.GetDirectoryContentsButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.GetDirectoryContentsButton.Location = New System.Drawing.Point(17, 90)
+        Me.GetDirectoryContentsButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GetDirectoryContentsButton.Name = "GetDirectoryContentsButton"
-        Me.GetDirectoryContentsButton.Size = New System.Drawing.Size(250, 23)
+        Me.GetDirectoryContentsButton.Size = New System.Drawing.Size(333, 28)
         Me.GetDirectoryContentsButton.TabIndex = 2
         Me.GetDirectoryContentsButton.Text = "Get a list of subdirectories and files in a directory:"
         Me.GetDirectoryContentsButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -115,6 +115,7 @@ Partial Class Form1
         '
         Me.SplitContainer1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.SplitContainer1.Location = New System.Drawing.Point(0, 0)
+        Me.SplitContainer1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.SplitContainer1.Name = "SplitContainer1"
         '
         'SplitContainer1.Panel1
@@ -142,17 +143,30 @@ Partial Class Form1
         'SplitContainer1.Panel2
         '
         Me.SplitContainer1.Panel2.Controls.Add(Me.OutputTabControl)
-        Me.SplitContainer1.Size = New System.Drawing.Size(1184, 761)
-        Me.SplitContainer1.SplitterDistance = 265
+        Me.SplitContainer1.Size = New System.Drawing.Size(1579, 937)
+        Me.SplitContainer1.SplitterDistance = 353
+        Me.SplitContainer1.SplitterWidth = 5
         Me.SplitContainer1.TabIndex = 4
+        '
+        'GetMetadataFromDataTableButton
+        '
+        Me.GetMetadataFromDataTableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.GetMetadataFromDataTableButton.Location = New System.Drawing.Point(17, 506)
+        Me.GetMetadataFromDataTableButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.GetMetadataFromDataTableButton.Name = "GetMetadataFromDataTableButton"
+        Me.GetMetadataFromDataTableButton.Size = New System.Drawing.Size(265, 49)
+        Me.GetMetadataFromDataTableButton.TabIndex = 19
+        Me.GetMetadataFromDataTableButton.Text = "Get Metadata from DataTable..."
+        Me.GetMetadataFromDataTableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.GetMetadataFromDataTableButton.UseVisualStyleBackColor = True
         '
         'DataTableFromSQLServerButton
         '
         Me.DataTableFromSQLServerButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DataTableFromSQLServerButton.Location = New System.Drawing.Point(13, 593)
-        Me.DataTableFromSQLServerButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DataTableFromSQLServerButton.Location = New System.Drawing.Point(17, 730)
+        Me.DataTableFromSQLServerButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DataTableFromSQLServerButton.Name = "DataTableFromSQLServerButton"
-        Me.DataTableFromSQLServerButton.Size = New System.Drawing.Size(199, 28)
+        Me.DataTableFromSQLServerButton.Size = New System.Drawing.Size(265, 34)
         Me.DataTableFromSQLServerButton.TabIndex = 18
         Me.DataTableFromSQLServerButton.Text = "DataTable from SQL Server"
         Me.DataTableFromSQLServerButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -161,10 +175,10 @@ Partial Class Form1
         'TransposeADataTableButton
         '
         Me.TransposeADataTableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.TransposeADataTableButton.Location = New System.Drawing.Point(13, 561)
-        Me.TransposeADataTableButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.TransposeADataTableButton.Location = New System.Drawing.Point(17, 690)
+        Me.TransposeADataTableButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.TransposeADataTableButton.Name = "TransposeADataTableButton"
-        Me.TransposeADataTableButton.Size = New System.Drawing.Size(199, 28)
+        Me.TransposeADataTableButton.Size = New System.Drawing.Size(265, 34)
         Me.TransposeADataTableButton.TabIndex = 17
         Me.TransposeADataTableButton.Text = "Transpose a DataTable"
         Me.TransposeADataTableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -173,10 +187,10 @@ Partial Class Form1
         'PDFTableToDataTableButton
         '
         Me.PDFTableToDataTableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.PDFTableToDataTableButton.Location = New System.Drawing.Point(13, 529)
-        Me.PDFTableToDataTableButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.PDFTableToDataTableButton.Location = New System.Drawing.Point(17, 651)
+        Me.PDFTableToDataTableButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.PDFTableToDataTableButton.Name = "PDFTableToDataTableButton"
-        Me.PDFTableToDataTableButton.Size = New System.Drawing.Size(199, 28)
+        Me.PDFTableToDataTableButton.Size = New System.Drawing.Size(265, 34)
         Me.PDFTableToDataTableButton.TabIndex = 16
         Me.PDFTableToDataTableButton.Text = "PDF table to DataTable"
         Me.PDFTableToDataTableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -185,10 +199,10 @@ Partial Class Form1
         'ShowDataTableExplorerControlButton
         '
         Me.ShowDataTableExplorerControlButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.ShowDataTableExplorerControlButton.Location = New System.Drawing.Point(13, 497)
-        Me.ShowDataTableExplorerControlButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.ShowDataTableExplorerControlButton.Location = New System.Drawing.Point(17, 612)
+        Me.ShowDataTableExplorerControlButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.ShowDataTableExplorerControlButton.Name = "ShowDataTableExplorerControlButton"
-        Me.ShowDataTableExplorerControlButton.Size = New System.Drawing.Size(199, 28)
+        Me.ShowDataTableExplorerControlButton.Size = New System.Drawing.Size(265, 34)
         Me.ShowDataTableExplorerControlButton.TabIndex = 15
         Me.ShowDataTableExplorerControlButton.Text = "ShowDatasetExplorerControl..."
         Me.ShowDataTableExplorerControlButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -197,10 +211,10 @@ Partial Class Form1
         'DataColumnIsNumericButton
         '
         Me.DataColumnIsNumericButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DataColumnIsNumericButton.Location = New System.Drawing.Point(13, 465)
-        Me.DataColumnIsNumericButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DataColumnIsNumericButton.Location = New System.Drawing.Point(17, 572)
+        Me.DataColumnIsNumericButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DataColumnIsNumericButton.Name = "DataColumnIsNumericButton"
-        Me.DataColumnIsNumericButton.Size = New System.Drawing.Size(199, 28)
+        Me.DataColumnIsNumericButton.Size = New System.Drawing.Size(265, 34)
         Me.DataColumnIsNumericButton.TabIndex = 14
         Me.DataColumnIsNumericButton.Text = "DataColumn IsNumeric..."
         Me.DataColumnIsNumericButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -210,19 +224,20 @@ Partial Class Form1
         '
         Me.Label3.AutoSize = True
         Me.Label3.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label3.Location = New System.Drawing.Point(9, 109)
+        Me.Label3.Location = New System.Drawing.Point(12, 134)
+        Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(67, 19)
+        Me.Label3.Size = New System.Drawing.Size(82, 24)
         Me.Label3.TabIndex = 13
         Me.Label3.Text = "Dataset"
         '
         'GetDatasetFromExcelButton
         '
         Me.GetDatasetFromExcelButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetDatasetFromExcelButton.Location = New System.Drawing.Point(13, 130)
-        Me.GetDatasetFromExcelButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.GetDatasetFromExcelButton.Location = New System.Drawing.Point(17, 160)
+        Me.GetDatasetFromExcelButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GetDatasetFromExcelButton.Name = "GetDatasetFromExcelButton"
-        Me.GetDatasetFromExcelButton.Size = New System.Drawing.Size(199, 28)
+        Me.GetDatasetFromExcelButton.Size = New System.Drawing.Size(265, 34)
         Me.GetDatasetFromExcelButton.TabIndex = 12
         Me.GetDatasetFromExcelButton.Text = "Get Dataset from Excel..."
         Me.GetDatasetFromExcelButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -230,10 +245,10 @@ Partial Class Form1
         '
         'GetMetadataDatasetFromExcelButton
         '
-        Me.GetMetadataDatasetFromExcelButton.Location = New System.Drawing.Point(13, 625)
-        Me.GetMetadataDatasetFromExcelButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.GetMetadataDatasetFromExcelButton.Location = New System.Drawing.Point(17, 769)
+        Me.GetMetadataDatasetFromExcelButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GetMetadataDatasetFromExcelButton.Name = "GetMetadataDatasetFromExcelButton"
-        Me.GetMetadataDatasetFromExcelButton.Size = New System.Drawing.Size(199, 28)
+        Me.GetMetadataDatasetFromExcelButton.Size = New System.Drawing.Size(265, 34)
         Me.GetMetadataDatasetFromExcelButton.TabIndex = 11
         Me.GetMetadataDatasetFromExcelButton.Text = "Get metadata Dataset from Excel..."
         Me.GetMetadataDatasetFromExcelButton.UseVisualStyleBackColor = True
@@ -241,10 +256,10 @@ Partial Class Form1
         'DescribeADatasetButton
         '
         Me.DescribeADatasetButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DescribeADatasetButton.Location = New System.Drawing.Point(13, 162)
-        Me.DescribeADatasetButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DescribeADatasetButton.Location = New System.Drawing.Point(17, 199)
+        Me.DescribeADatasetButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DescribeADatasetButton.Name = "DescribeADatasetButton"
-        Me.DescribeADatasetButton.Size = New System.Drawing.Size(199, 41)
+        Me.DescribeADatasetButton.Size = New System.Drawing.Size(265, 50)
         Me.DescribeADatasetButton.TabIndex = 10
         Me.DescribeADatasetButton.Text = "Describe a Dataset, then show it in a form..."
         Me.DescribeADatasetButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -253,10 +268,10 @@ Partial Class Form1
         'GetMetadataDatasetFromDataTableButton
         '
         Me.GetMetadataDatasetFromDataTableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetMetadataDatasetFromDataTableButton.Location = New System.Drawing.Point(13, 367)
-        Me.GetMetadataDatasetFromDataTableButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.GetMetadataDatasetFromDataTableButton.Location = New System.Drawing.Point(17, 452)
+        Me.GetMetadataDatasetFromDataTableButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GetMetadataDatasetFromDataTableButton.Name = "GetMetadataDatasetFromDataTableButton"
-        Me.GetMetadataDatasetFromDataTableButton.Size = New System.Drawing.Size(199, 40)
+        Me.GetMetadataDatasetFromDataTableButton.Size = New System.Drawing.Size(265, 49)
         Me.GetMetadataDatasetFromDataTableButton.TabIndex = 9
         Me.GetMetadataDatasetFromDataTableButton.Text = "Get MetadataDataset from DataTable..."
         Me.GetMetadataDatasetFromDataTableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -265,10 +280,10 @@ Partial Class Form1
         'DataTableToCSVButton
         '
         Me.DataTableToCSVButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DataTableToCSVButton.Location = New System.Drawing.Point(13, 269)
-        Me.DataTableToCSVButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DataTableToCSVButton.Location = New System.Drawing.Point(17, 331)
+        Me.DataTableToCSVButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DataTableToCSVButton.Name = "DataTableToCSVButton"
-        Me.DataTableToCSVButton.Size = New System.Drawing.Size(199, 28)
+        Me.DataTableToCSVButton.Size = New System.Drawing.Size(265, 34)
         Me.DataTableToCSVButton.TabIndex = 8
         Me.DataTableToCSVButton.Text = "DataTable to CSV..."
         Me.DataTableToCSVButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -277,10 +292,10 @@ Partial Class Form1
         'ShowDataTableInAFormButton
         '
         Me.ShowDataTableInAFormButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.ShowDataTableInAFormButton.Location = New System.Drawing.Point(13, 335)
-        Me.ShowDataTableInAFormButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.ShowDataTableInAFormButton.Location = New System.Drawing.Point(17, 412)
+        Me.ShowDataTableInAFormButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.ShowDataTableInAFormButton.Name = "ShowDataTableInAFormButton"
-        Me.ShowDataTableInAFormButton.Size = New System.Drawing.Size(199, 28)
+        Me.ShowDataTableInAFormButton.Size = New System.Drawing.Size(265, 34)
         Me.ShowDataTableInAFormButton.TabIndex = 7
         Me.ShowDataTableInAFormButton.Text = "Show a DataTable in a Form..."
         Me.ShowDataTableInAFormButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -289,10 +304,10 @@ Partial Class Form1
         'DataTableFromExcelButton
         '
         Me.DataTableFromExcelButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.DataTableFromExcelButton.Location = New System.Drawing.Point(13, 303)
-        Me.DataTableFromExcelButton.Margin = New System.Windows.Forms.Padding(2)
+        Me.DataTableFromExcelButton.Location = New System.Drawing.Point(17, 373)
+        Me.DataTableFromExcelButton.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DataTableFromExcelButton.Name = "DataTableFromExcelButton"
-        Me.DataTableFromExcelButton.Size = New System.Drawing.Size(199, 28)
+        Me.DataTableFromExcelButton.Size = New System.Drawing.Size(265, 34)
         Me.DataTableFromExcelButton.TabIndex = 6
         Me.DataTableFromExcelButton.Text = "DataTable from Excel..."
         Me.DataTableFromExcelButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -302,9 +317,10 @@ Partial Class Form1
         '
         Me.Label2.AutoSize = True
         Me.Label2.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label2.Location = New System.Drawing.Point(9, 216)
+        Me.Label2.Location = New System.Drawing.Point(12, 266)
+        Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(85, 19)
+        Me.Label2.Size = New System.Drawing.Size(104, 24)
         Me.Label2.TabIndex = 5
         Me.Label2.Text = "DataTable"
         '
@@ -312,9 +328,10 @@ Partial Class Form1
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Arial", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(9, 25)
+        Me.Label1.Location = New System.Drawing.Point(12, 31)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(196, 19)
+        Me.Label1.Size = New System.Drawing.Size(246, 24)
         Me.Label1.TabIndex = 4
         Me.Label1.Text = "Directory and file utilities"
         '
@@ -327,17 +344,19 @@ Partial Class Form1
         Me.OutputTabControl.Controls.Add(Me.DevExpressMapTabPage)
         Me.OutputTabControl.Dock = System.Windows.Forms.DockStyle.Fill
         Me.OutputTabControl.Location = New System.Drawing.Point(0, 0)
+        Me.OutputTabControl.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputTabControl.Name = "OutputTabControl"
         Me.OutputTabControl.SelectedIndex = 0
-        Me.OutputTabControl.Size = New System.Drawing.Size(915, 761)
+        Me.OutputTabControl.Size = New System.Drawing.Size(1221, 937)
         Me.OutputTabControl.TabIndex = 0
         '
         'InputTabPage
         '
         Me.InputTabPage.Controls.Add(Me.InputTextBox)
-        Me.InputTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.InputTabPage.Location = New System.Drawing.Point(4, 25)
+        Me.InputTabPage.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.InputTabPage.Name = "InputTabPage"
-        Me.InputTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.InputTabPage.Size = New System.Drawing.Size(1213, 908)
         Me.InputTabPage.TabIndex = 3
         Me.InputTabPage.Text = "Input"
         Me.InputTabPage.UseVisualStyleBackColor = True
@@ -347,20 +366,22 @@ Partial Class Form1
         Me.InputTextBox.Dock = System.Windows.Forms.DockStyle.Fill
         Me.InputTextBox.Font = New System.Drawing.Font("Courier New", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.InputTextBox.Location = New System.Drawing.Point(0, 0)
+        Me.InputTextBox.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.InputTextBox.Multiline = True
         Me.InputTextBox.Name = "InputTextBox"
         Me.InputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.InputTextBox.Size = New System.Drawing.Size(907, 735)
+        Me.InputTextBox.Size = New System.Drawing.Size(1213, 908)
         Me.InputTextBox.TabIndex = 1
         Me.InputTextBox.WordWrap = False
         '
         'TextTabPage
         '
         Me.TextTabPage.Controls.Add(Me.OutputTextBox)
-        Me.TextTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.TextTabPage.Location = New System.Drawing.Point(4, 25)
+        Me.TextTabPage.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.TextTabPage.Name = "TextTabPage"
-        Me.TextTabPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.TextTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.TextTabPage.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.TextTabPage.Size = New System.Drawing.Size(1213, 908)
         Me.TextTabPage.TabIndex = 0
         Me.TextTabPage.Text = "Output"
         Me.TextTabPage.UseVisualStyleBackColor = True
@@ -369,21 +390,23 @@ Partial Class Form1
         '
         Me.OutputTextBox.Dock = System.Windows.Forms.DockStyle.Fill
         Me.OutputTextBox.Font = New System.Drawing.Font("Courier New", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.OutputTextBox.Location = New System.Drawing.Point(3, 3)
+        Me.OutputTextBox.Location = New System.Drawing.Point(4, 4)
+        Me.OutputTextBox.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputTextBox.Multiline = True
         Me.OutputTextBox.Name = "OutputTextBox"
         Me.OutputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.OutputTextBox.Size = New System.Drawing.Size(901, 729)
+        Me.OutputTextBox.Size = New System.Drawing.Size(1205, 900)
         Me.OutputTextBox.TabIndex = 0
         Me.OutputTextBox.WordWrap = False
         '
         'DataGridViewTabPage
         '
         Me.DataGridViewTabPage.Controls.Add(Me.SplitContainer2)
-        Me.DataGridViewTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.DataGridViewTabPage.Location = New System.Drawing.Point(4, 25)
+        Me.DataGridViewTabPage.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.DataGridViewTabPage.Name = "DataGridViewTabPage"
-        Me.DataGridViewTabPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.DataGridViewTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.DataGridViewTabPage.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.DataGridViewTabPage.Size = New System.Drawing.Size(1213, 908)
         Me.DataGridViewTabPage.TabIndex = 2
         Me.DataGridViewTabPage.Text = "Data table"
         Me.DataGridViewTabPage.UseVisualStyleBackColor = True
@@ -391,7 +414,8 @@ Partial Class Form1
         'SplitContainer2
         '
         Me.SplitContainer2.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.SplitContainer2.Location = New System.Drawing.Point(3, 3)
+        Me.SplitContainer2.Location = New System.Drawing.Point(4, 4)
+        Me.SplitContainer2.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.SplitContainer2.Name = "SplitContainer2"
         Me.SplitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal
         '
@@ -402,8 +426,9 @@ Partial Class Form1
         'SplitContainer2.Panel2
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.OutputGridControl)
-        Me.SplitContainer2.Size = New System.Drawing.Size(901, 729)
-        Me.SplitContainer2.SplitterDistance = 300
+        Me.SplitContainer2.Size = New System.Drawing.Size(1205, 900)
+        Me.SplitContainer2.SplitterDistance = 370
+        Me.SplitContainer2.SplitterWidth = 5
         Me.SplitContainer2.TabIndex = 2
         '
         'OutputDataGridView
@@ -427,22 +452,27 @@ Partial Class Form1
         Me.OutputDataGridView.DefaultCellStyle = DataGridViewCellStyle2
         Me.OutputDataGridView.Dock = System.Windows.Forms.DockStyle.Fill
         Me.OutputDataGridView.Location = New System.Drawing.Point(0, 0)
+        Me.OutputDataGridView.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputDataGridView.Name = "OutputDataGridView"
-        Me.OutputDataGridView.Size = New System.Drawing.Size(901, 300)
+        Me.OutputDataGridView.RowHeadersWidth = 51
+        Me.OutputDataGridView.Size = New System.Drawing.Size(1205, 370)
         Me.OutputDataGridView.TabIndex = 0
         '
         'OutputGridControl
         '
         Me.OutputGridControl.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.OutputGridControl.EmbeddedNavigator.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputGridControl.Location = New System.Drawing.Point(0, 0)
         Me.OutputGridControl.MainView = Me.GridView1
+        Me.OutputGridControl.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputGridControl.Name = "OutputGridControl"
-        Me.OutputGridControl.Size = New System.Drawing.Size(901, 425)
+        Me.OutputGridControl.Size = New System.Drawing.Size(1205, 525)
         Me.OutputGridControl.TabIndex = 1
         Me.OutputGridControl.ViewCollection.AddRange(New DevExpress.XtraGrid.Views.Base.BaseView() {Me.GridView1})
         '
         'GridView1
         '
+        Me.GridView1.DetailHeight = 431
         Me.GridView1.GridControl = Me.OutputGridControl
         Me.GridView1.Name = "GridView1"
         Me.GridView1.OptionsView.BestFitMode = DevExpress.XtraGrid.Views.Grid.GridBestFitMode.Full
@@ -451,10 +481,11 @@ Partial Class Form1
         'PropertyGridTabPage
         '
         Me.PropertyGridTabPage.Controls.Add(Me.OutputPropertyGrid)
-        Me.PropertyGridTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.PropertyGridTabPage.Location = New System.Drawing.Point(4, 25)
+        Me.PropertyGridTabPage.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.PropertyGridTabPage.Name = "PropertyGridTabPage"
-        Me.PropertyGridTabPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.PropertyGridTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.PropertyGridTabPage.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.PropertyGridTabPage.Size = New System.Drawing.Size(1213, 908)
         Me.PropertyGridTabPage.TabIndex = 1
         Me.PropertyGridTabPage.Text = "Properties"
         Me.PropertyGridTabPage.UseVisualStyleBackColor = True
@@ -462,40 +493,30 @@ Partial Class Form1
         'OutputPropertyGrid
         '
         Me.OutputPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.OutputPropertyGrid.Location = New System.Drawing.Point(3, 3)
+        Me.OutputPropertyGrid.Location = New System.Drawing.Point(4, 4)
+        Me.OutputPropertyGrid.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.OutputPropertyGrid.Name = "OutputPropertyGrid"
-        Me.OutputPropertyGrid.Size = New System.Drawing.Size(901, 729)
+        Me.OutputPropertyGrid.Size = New System.Drawing.Size(1205, 900)
         Me.OutputPropertyGrid.TabIndex = 0
         '
         'DevExpressMapTabPage
         '
-        Me.DevExpressMapTabPage.Location = New System.Drawing.Point(4, 22)
+        Me.DevExpressMapTabPage.Location = New System.Drawing.Point(4, 25)
+        Me.DevExpressMapTabPage.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.DevExpressMapTabPage.Name = "DevExpressMapTabPage"
-        Me.DevExpressMapTabPage.Padding = New System.Windows.Forms.Padding(3)
-        Me.DevExpressMapTabPage.Size = New System.Drawing.Size(907, 735)
+        Me.DevExpressMapTabPage.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.DevExpressMapTabPage.Size = New System.Drawing.Size(1213, 908)
         Me.DevExpressMapTabPage.TabIndex = 4
         Me.DevExpressMapTabPage.Text = "DevExpress Map"
         Me.DevExpressMapTabPage.UseVisualStyleBackColor = True
         '
-        'GetMetadataFromDataTableButton
-        '
-        Me.GetMetadataFromDataTableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetMetadataFromDataTableButton.Location = New System.Drawing.Point(13, 411)
-        Me.GetMetadataFromDataTableButton.Margin = New System.Windows.Forms.Padding(2)
-        Me.GetMetadataFromDataTableButton.Name = "GetMetadataFromDataTableButton"
-        Me.GetMetadataFromDataTableButton.Size = New System.Drawing.Size(199, 40)
-        Me.GetMetadataFromDataTableButton.TabIndex = 19
-        Me.GetMetadataFromDataTableButton.Text = "Get Metadata from DataTable..."
-        Me.GetMetadataFromDataTableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.GetMetadataFromDataTableButton.UseVisualStyleBackColor = True
-        '
         'Form1
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1184, 761)
+        Me.ClientSize = New System.Drawing.Size(1579, 937)
         Me.Controls.Add(Me.SplitContainer1)
-        Me.Margin = New System.Windows.Forms.Padding(2)
+        Me.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.Name = "Form1"
         Me.Text = "Skeeter Utilities Tester"
         Me.SplitContainer1.Panel1.ResumeLayout(False)

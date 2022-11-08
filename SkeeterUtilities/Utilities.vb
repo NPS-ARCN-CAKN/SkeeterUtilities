@@ -59,7 +59,7 @@ Namespace DirectoryAndFile
                     'Loop through the directories and add them
                     For Each MyDirectory As String In My.Computer.FileSystem.GetDirectories(DirectoryInfo.FullName)
                         Dim MyDirectoryInfo As New DirectoryInfo(MyDirectory)
-                        ReturnString = ReturnString & "Directory|" & ReturnString & MyDirectoryInfo.Name & Separator & MyDirectoryInfo.FullName & vbNewLine
+                        ReturnString = ReturnString & "Directory|" & MyDirectoryInfo.Name & Separator & MyDirectoryInfo.FullName & vbNewLine
                     Next
 
                     'Loop through the files and add them
@@ -132,7 +132,7 @@ Namespace DataFileToDataTableConverters
     Public Class DataFileToDataTableConverters
 
         ''' <summary>
-        ''' Returns a DataTable of information about SourceDataTable.
+        ''' Returns a DataTable of metadata about SourceDataTable.
         ''' </summary>
         ''' <param name="SourceDataTable">Source data table. DataTable.</param>
         ''' <param name="UniqueValuesSeparator">One thing that is returned for each column of SourceDataTable is a list of unique values. These unique values will be separated by UniqueValuesSeparator.</param>
@@ -861,207 +861,205 @@ Namespace DataFileToDataTableConverters
 
                 'Read the CSV file into a String
                 Dim CSVStreamReader As New StreamReader(CSVFileInfo.FullName)
-                Dim CSV As String = CSVStreamReader.ReadToEnd
-                CSVStreamReader.Close()
-                CSVStreamReader.Dispose()
+                If Not CSVStreamReader Is Nothing Then
+                    Dim CSV As String = CSVStreamReader.ReadToEnd
+                    CSVStreamReader.Close()
+                    CSVStreamReader.Dispose()
 
-                'Read the CSV into lines and then an array
-                Dim CSVLines As String() = CSV.Split(ControlChars.Lf)
-                Dim ColumnsArray As String() = CSVLines(0).Split(","c)
+                    'Read the CSV into lines and then an array
+                    Dim CSVLines As String() = CSV.Split(ControlChars.Lf)
+                    Dim ColumnsArray As String() = CSVLines(0).Split(","c)
 
-                'The first thing we need to do is read all the CSV data into a DataTable.
-                'Treat all data as String until we can figure out what data type each column actually is
-                'Add columns to the data table based on the first row of the csv file
-                For Each ColumnName As String In ColumnsArray
-                    CSVStringDataTable.Columns.Add(New DataColumn(ColumnName))
-                Next
+                    'The first thing we need to do is read all the CSV data into a DataTable.
+                    'Treat all data as String until we can figure out what data type each column actually is
+                    'Add columns to the data table based on the first row of the csv file
+                    For Each ColumnName As String In ColumnsArray
+                        CSVStringDataTable.Columns.Add(New DataColumn(ColumnName))
+                    Next
 
-                'Add the CSV data to new data rows and add them to the CSV string data table
-                Dim RowIndex As Integer = 0
-                For Each CSVLine As String In CSVLines
+                    'Add the CSV data to new data rows and add them to the CSV string data table
+                    Dim RowIndex As Integer = 0
+                    For Each CSVLine As String In CSVLines
 
-                    'Don't add any blank rows to the data table
-                    If CSVLine.Trim <> "" Then
+                        'Don't add any blank rows to the data table
+                        If CSVLine.Trim <> "" Then
 
-                        'Avoid duplicating the first row containing the column names
-                        If RowIndex > 0 Then
+                            'Avoid duplicating the first row containing the column names
+                            If RowIndex > 0 Then
 
-                            'Create a new data row 
-                            Dim NewRow As DataRow = CSVStringDataTable.NewRow
+                                'Create a new data row 
+                                Dim NewRow As DataRow = CSVStringDataTable.NewRow
 
-                            ''Parse the CSV line into separate values
-                            'Dim CSVItems As String() = CSVLine.Split(",")
-                            'Debug.Print(CSVLine)
-                            'For Each CSVItem As String In CSVItems
-                            '    CSVItem = CSVItem.Replace(",", "").Replace(vbCrLf, "")
-                            '    Debug.Print(vbTab & CSVItem.Replace(",", "").Replace(vbCrLf, ""))
-                            'Next
+                                ''Parse the CSV line into separate values
+                                'Dim CSVItems As String() = CSVLine.Split(",")
+                                'Debug.Print(CSVLine)
+                                'For Each CSVItem As String In CSVItems
+                                '    CSVItem = CSVItem.Replace(",", "").Replace(vbCrLf, "")
+                                '    Debug.Print(vbTab & CSVItem.Replace(",", "").Replace(vbCrLf, ""))
+                                'Next
 
-                            Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
-                            NewRow.ItemArray = CSVFinalLine.Split(","c)
-                            CSVStringDataTable.Rows.Add(NewRow)
+                                Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
+                                NewRow.ItemArray = CSVFinalLine.Split(","c)
+                                CSVStringDataTable.Rows.Add(NewRow)
+                            End If
+
                         End If
+                        RowIndex = RowIndex + 1
+                    Next
 
-                    End If
-                    RowIndex = RowIndex + 1
-                Next
+                    'Loop through each column in the CSV string data table
+                    For Each Col As DataColumn In CSVStringDataTable.Columns
+                        Dim NullCounter As Integer = 0
+                        'Dim BlankCounter As Integer = 0
 
-                'Loop through each column in the CSV string data table
-                For Each Col As DataColumn In CSVStringDataTable.Columns
-                    Dim NullCounter As Integer = 0
-                    'Dim BlankCounter As Integer = 0
+                        Dim DateCounter As Integer = 0
+                        Dim IntegerCounter As Integer = 0
+                        Dim BooleanCounter As Integer = 0
+                        Dim BitCounter As Integer = 0
+                        'Dim DecimalCounter As Integer = 0
+                        Dim DoubleCounter As Integer = 0
+                        'Dim SingleCounter As Integer = 0
+                        Dim TextCounter As Integer = 0
 
-                    Dim DateCounter As Integer = 0
-                    Dim IntegerCounter As Integer = 0
-                    Dim BooleanCounter As Integer = 0
-                    Dim BitCounter As Integer = 0
-                    'Dim DecimalCounter As Integer = 0
-                    Dim DoubleCounter As Integer = 0
-                    'Dim SingleCounter As Integer = 0
-                    Dim TextCounter As Integer = 0
-
-                    'Loop through the columns
-                    If Not Col Is Nothing Then
+                        'Loop through the columns
+                        If Not Col Is Nothing Then
 
 
-                        'And then loop through each row
-                        'Dim i As Integer = 0
-                        For Each Row As DataRow In CSVStringDataTable.Rows
-                            If Not Row Is Nothing Then
+                            'And then loop through each row
+                            'Dim i As Integer = 0
+                            For Each Row As DataRow In CSVStringDataTable.Rows
+                                If Not Row Is Nothing Then
 
-                                'Determine if the row is null
-                                If Not IsDBNull(Row.Item(Col.ColumnName)) Then
+                                    'Determine if the row is null
+                                    If Not IsDBNull(Row.Item(Col.ColumnName)) Then
 
-                                    'Get the cell value
-                                    Dim CellValue As String = Row.Item(Col.ColumnName).ToString.Trim
+                                        'Get the cell value
+                                        Dim CellValue As String = Row.Item(Col.ColumnName).ToString.Trim
 
-                                    'Determine if the cell is blank
-                                    If CellValue.Length > 0 Then
+                                        'Determine if the cell is blank
+                                        If CellValue.Length > 0 Then
 
-                                        'Determine what data type CellValue is
-                                        If ValueIsDate(CellValue) = True Then
-                                            'It's a Date. Increment the DateCounter
-                                            DateCounter = DateCounter + 1
+                                            'Determine what data type CellValue is
+                                            If ValueIsDate(CellValue) = True Then
+                                                'It's a Date. Increment the DateCounter
+                                                DateCounter = DateCounter + 1
 
-                                        ElseIf IsNumeric(CellValue) = True Then
-                                            'It's a number
+                                            ElseIf IsNumeric(CellValue) = True Then
+                                                'It's a number
 
-                                            'Determine if the value is an integer.
-                                            If ValueIsInteger(CellValue) Then
-                                                IntegerCounter = IntegerCounter + 1
+                                                'Determine if the value is an integer.
+                                                If ValueIsInteger(CellValue) Then
+                                                    IntegerCounter = IntegerCounter + 1
 
-                                                'Determine if the value is Bit (boolean).
-                                                If CellValue = 0 Or CellValue = 1 Then BitCounter = BitCounter + 1
+                                                    'Determine if the value is Bit (boolean).
+                                                    If CellValue = 0 Or CellValue = 1 Then BitCounter = BitCounter + 1
+                                                Else
+                                                    'It must be a Double or similar (Decimal,Single, etc.). Treat as Double.
+                                                    DoubleCounter = DoubleCounter + 1
+                                                End If
                                             Else
-                                                'It must be a Double or similar (Decimal,Single, etc.). Treat as Double.
-                                                DoubleCounter = DoubleCounter + 1
+
+                                                'It's a String. See if it's boolean.
+                                                If CellValue.ToLower = "True" Or CellValue.ToLower = "False" Or CellValue.ToLower = "t" Or CellValue.ToLower = "f" Or CellValue.ToLower = "y" Or CellValue.ToLower = "n" Or CellValue.ToLower = "yes" Or CellValue.ToLower = "no" Then
+                                                    'Value is boolean text.
+                                                    BooleanCounter = BooleanCounter + 1
+                                                Else
+                                                    'Value is non-boolean text
+                                                    TextCounter = TextCounter + 1
+                                                End If
+
                                             End If
                                         Else
 
-                                            'It's a String. See if it's boolean.
-                                            If CellValue.ToLower = "True" Or CellValue.ToLower = "False" Or CellValue.ToLower = "t" Or CellValue.ToLower = "f" Or CellValue.ToLower = "y" Or CellValue.ToLower = "n" Or CellValue.ToLower = "yes" Or CellValue.ToLower = "no" Then
-                                                'Value is boolean text.
-                                                BooleanCounter = BooleanCounter + 1
-                                            Else
-                                                'Value is non-boolean text
-                                                TextCounter = TextCounter + 1
-                                            End If
+                                            'Cell is Blank
+                                            NullCounter = NullCounter + 1
 
                                         End If
                                     Else
-
-                                        'Cell is Blank
+                                        'Cell is DBNull
                                         NullCounter = NullCounter + 1
 
                                     End If
-                                Else
-                                    'Cell is DBNull
-                                    NullCounter = NullCounter + 1
 
                                 End If
+                            Next
+                        End If
 
+                        'Debug.Print("-" & Col.ColumnName & " Rows " & CSVStringDataTable.Rows.Count & " nulls " & NullCounter & " texts " & TextCounter & " dbl " & DoubleCounter & " bln " & BooleanCounter & " int " & IntegerCounter)
+
+                        'Add Columns to ReturnDataTable based on what kind of rows we have, as determined above
+                        If TextCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = TextCounter Then
+
+                            'The row has at least one text entry, make the added DataColumn text
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+
+                        ElseIf DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = DateCounter Then
+
+                            'All the rows are Dates. 
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
+
+                        ElseIf IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = IntegerCounter And BitCounter <> IntegerCounter Then
+
+                            'All the rows are integers, but not completely Bit
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+
+                        ElseIf IntegerCounter > 0 And DoubleCounter = 0 And CSVStringDataTable.Rows.Count - NullCounter = IntegerCounter And BitCounter = IntegerCounter Then
+
+                            'All the rows are Integers and Bit
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
+
+                        ElseIf DoubleCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - IntegerCounter = DoubleCounter Then
+
+                            'All the rows are Double
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Double))
+
+                        ElseIf BooleanCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = BooleanCounter Then
+
+                            'All the rows were boolean.
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
+
+                        Else
+
+                            'All other possibilities eliminated, data type will be String.
+                            ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
+                        End If
+
+                    Next
+
+                    'Fix all the text booleans
+                    'Convert all the text booleans to True/False
+                    For Each Col As DataColumn In CSVStringDataTable.Columns
+                        For Each CSVRow As DataRow In CSVStringDataTable.Rows
+                            If CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "True" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "t" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "y" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "yes" Then
+                                CSVRow.Item(Col.ColumnName) = True
+                            ElseIf CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "False" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "f" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "n" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "no" Then
+                                CSVRow.Item(Col.ColumnName) = False
                             End If
                         Next
-                    End If
-
-                    'Debug.Print("-" & Col.ColumnName & " Rows " & CSVStringDataTable.Rows.Count & " nulls " & NullCounter & " texts " & TextCounter & " dbl " & DoubleCounter & " bln " & BooleanCounter & " int " & IntegerCounter)
-
-                    'Add Columns to ReturnDataTable based on what kind of rows we have, as determined above
-                    If TextCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = TextCounter Then
-
-                        'The row has at least one text entry, make the added DataColumn text
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
-
-                    ElseIf DateCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = DateCounter Then
-
-                        'All the rows are Dates. 
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Date))
-
-                    ElseIf IntegerCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = IntegerCounter And BitCounter <> IntegerCounter Then
-
-                        'All the rows are integers, but not completely Bit
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
-
-                    ElseIf IntegerCounter > 0 And DoubleCounter = 0 And CSVStringDataTable.Rows.Count - NullCounter = IntegerCounter And BitCounter = IntegerCounter Then
-
-                        'All the rows are Integers and Bit
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Integer))
-
-                    ElseIf DoubleCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter - integercounter = DoubleCounter Then
-
-                        'All the rows are Double
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Double))
-
-                    ElseIf BooleanCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = BooleanCounter Then
-
-                        'All the rows were boolean.
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(Boolean))
-
-                    Else
-
-                        'All other possibilities eliminated, data type will be String.
-                        ReturnDataTable.Columns.Add(Col.ColumnName, GetType(String))
-                    End If
-
-                Next
-
-
-
-                'Debug.Print("UNFIXED String booleans -----------------------------------")
-                'Debug.Print(DataTableToCSV(CSVStringDataTable, ","))
-                'Debug.Print("UNFIXED String booleans -----------------------------------")
-
-                'Fix all the text booleans
-                'Convert all the text booleans to True/False
-                For Each Col As DataColumn In CSVStringDataTable.Columns
-                    For Each CSVRow As DataRow In CSVStringDataTable.Rows
-                        If CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "True" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "t" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "y" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "yes" Then
-                            CSVRow.Item(Col.ColumnName) = True
-                        ElseIf CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "False" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "f" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "n" Or CSVRow.Item(Col.ColumnName).ToString.Trim.ToLower = "no" Then
-                            CSVRow.Item(Col.ColumnName) = False
-                        End If
                     Next
-                Next
 
 
 
-                'Now load the data from the all String DataTable into ReturnDataTable with the corrected data types
-                Dim i As Integer = 0
-                For Each Row As DataRow In CSVStringDataTable.Rows
-                    Dim NewRow As DataRow = ReturnDataTable.NewRow
-                    For Each Col As DataColumn In CSVStringDataTable.Columns
-                        If IsDBNull(Row.Item(Col.ColumnName)) = False Then
-                            If Row.Item(Col.ColumnName).ToString.Trim.Length > 0 Then
-                                NewRow.Item(Col.ColumnName) = Row.Item(Col.ColumnName)
+                    'Now load the data from the all String DataTable into ReturnDataTable with the corrected data types
+                    Dim i As Integer = 0
+                    For Each Row As DataRow In CSVStringDataTable.Rows
+                        Dim NewRow As DataRow = ReturnDataTable.NewRow
+                        For Each Col As DataColumn In CSVStringDataTable.Columns
+                            If IsDBNull(Row.Item(Col.ColumnName)) = False Then
+                                If Row.Item(Col.ColumnName).ToString.Trim.Length > 0 Then
+                                    NewRow.Item(Col.ColumnName) = Row.Item(Col.ColumnName)
+                                End If
                             End If
-                        End If
+                        Next
+                        i = i + 1
+                        ReturnDataTable.Rows.Add(NewRow)
                     Next
-                    i = i + 1
-                    ReturnDataTable.Rows.Add(NewRow)
-                Next
+                Else
+                    MsgBox("There was a problem opening the CSV file. Canceled.")
+                End If
 
             Catch SAEx As ArgumentException
-                MsgBox(SAEx.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")" & vbNewLine & vbNewLine & "The most common cause Of this Error Is a datum containing one Or more commas. The comma separated values parser cannot parse data containing commas. Remove any commas from the data And Try again.")
+                MsgBox(SAEx.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")" & vbNewLine & vbNewLine & "The most common cause of this error is a datum containing one or more commas. The comma separated values parser cannot parse data containing commas. Remove any commas from the data And Try again.")
             Catch ex As Exception
                 MsgBox(ex.Message & " (" & System.Reflection.MethodBase.GetCurrentMethod.Name & ")", MsgBoxStyle.OkOnly, "Exception")
             End Try
@@ -1935,6 +1933,17 @@ Namespace DataFileToDataTableConverters
                 MsgBox(ex.Message & "  " & System.Reflection.MethodBase.GetCurrentMethod.Name)
             End Try
             Return dtnew
+        End Function
+
+
+        Public Shared Function GetMetadataDataTable(DataTable As DataTable) As String
+            Dim MD As String = ""
+            Try
+
+            Catch ex As Exception
+                MsgBox(ex.Message & "  " & System.Reflection.MethodBase.GetCurrentMethod.Name)
+            End Try
+            Return MD
         End Function
 
     End Class
