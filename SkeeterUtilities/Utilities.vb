@@ -203,16 +203,9 @@ Namespace DataFileToDataTableConverters
                                         If IsDate(CellValue) = True Then DateValuesCount = DateValuesCount + 1
                                     End If
 
-
-                                    'Debug.Print(vbNewLine & SourceColumn.ColumnName & " " & RowIndex & " Value: " & CellValue & " Blanks: " & BlankCount & " Nulls: " & NullCount)
-                                    'Debug.Print(vbTab & "MaxLength: " & MaxLength)
-                                    'Debug.Print(vbTab & "NumericValuesCount: " & NumericValuesCount)
-                                    'Debug.Print(vbTab & "BitValuesCount: " & BitValuesCount & vbTab & TrueValuesCount & " " & FalseValuesCount)
-                                    'Debug.Print(vbTab & "DatesCount: " & DatesCount)
-
                                 Else
-                                        'Cell is blank, increment the blank counter
-                                        BlankCount = BlankCount + 1
+                                    'Cell is blank, increment the blank counter
+                                    BlankCount = BlankCount + 1
                                 End If
                             Else
                                 'Cell value is null, increment the null counter
@@ -301,7 +294,7 @@ Namespace DataFileToDataTableConverters
                     .Item("Blanks") = BlankCount
                     .Item("Nulls") = NullCount
                     .Item("IsBlank") = SourceColumnIsBlank
-                    '.Item("UniqueValues") = UniqueValues
+                    .Item("UniqueValues") = UniqueValues
                     .Item("NumericValuesCount") = NumericValuesCount
                     .Item("Numericity") = Numericity
                     .Item("BitValuesCount") = TrueValuesCount + FalseValuesCount
@@ -329,6 +322,8 @@ Namespace DataFileToDataTableConverters
                     End If
                 Next
             Next
+
+
             Return MetadataDataTable
         End Function
 
@@ -890,14 +885,6 @@ Namespace DataFileToDataTableConverters
                                 'Create a new data row 
                                 Dim NewRow As DataRow = CSVStringDataTable.NewRow
 
-                                ''Parse the CSV line into separate values
-                                'Dim CSVItems As String() = CSVLine.Split(",")
-                                'Debug.Print(CSVLine)
-                                'For Each CSVItem As String In CSVItems
-                                '    CSVItem = CSVItem.Replace(",", "").Replace(vbCrLf, "")
-                                '    Debug.Print(vbTab & CSVItem.Replace(",", "").Replace(vbCrLf, ""))
-                                'Next
-
                                 Dim CSVFinalLine As String = CSVLine.Replace(Convert.ToString(ControlChars.Cr), "")
                                 NewRow.ItemArray = CSVFinalLine.Split(","c)
                                 CSVStringDataTable.Rows.Add(NewRow)
@@ -985,7 +972,6 @@ Namespace DataFileToDataTableConverters
                             Next
                         End If
 
-                        'Debug.Print("-" & Col.ColumnName & " Rows " & CSVStringDataTable.Rows.Count & " nulls " & NullCounter & " texts " & TextCounter & " dbl " & DoubleCounter & " bln " & BooleanCounter & " int " & IntegerCounter)
 
                         'Add Columns to ReturnDataTable based on what kind of rows we have, as determined above
                         If TextCounter > 0 And CSVStringDataTable.Rows.Count - NullCounter = TextCounter Then
